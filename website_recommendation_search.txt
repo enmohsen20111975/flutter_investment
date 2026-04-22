@@ -1,0 +1,297 @@
+﻿
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:406:    const headerRight = 
+document.getElementById('headerActionsGroup')
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:415:        <div id="guestActions" 
+class="flex items-center gap-2">
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:425:        <div id="userActions" 
+class="hidden relative">
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:489:    const guestActions = 
+document.getElementById('guestActions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:490:    const userActions = 
+document.getElementById('userActions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:495:    if (guestActions) 
+guestActions.classList.add('hidden');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:496:    if (userActions) 
+userActions.classList.remove('hidden');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:507:    const guestActions = 
+document.getElementById('guestActions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:508:    const userActions = 
+document.getElementById('userActions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:510:    if (guestActions) 
+guestActions.classList.remove('hidden');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:511:    if (userActions) 
+userActions.classList.add('hidden');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:520:        const 
+userActionsContainer = document.getElementById('userActions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:521:        if (userMenu && 
+!userActionsContainer?.contains(e.target)) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:738:async function 
+deleteIncomeExpense(transactionId) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:740:        await 
+apiService.deleteIncomeExpense(transactionId);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:749:async function 
+updateIncomeExpense(transactionId, data) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\user.js:751:        const response = await 
+apiService.updateIncomeExpense(transactionId, data);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\merged-investment-course.js:12:        
+"source": "enmohsen20111975/investment-course@main",
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\merged-investment-course.js:337:             
+                       "content": "<div class=\"space-y-3\"><div class=\"p-3 
+rounded-lg bg-blue-50 border border-blue-100\"><div class=\"font-bold 
+mb-1\">حجم المركز (Position Size)</div><div class=\"font-mono text-blue-700 
+mb-1\">Shares = (Capital * Risk%) / (Entry - StopLoss)</div><div 
+class=\"text-sm text-gray-700\">المعادلة التي تحدد كم سهم يجب أن تشتري بناءً 
+على مخاطرتك.</div></div><div class=\"p-3 rounded-lg bg-blue-50 border 
+border-blue-100\"><div class=\"font-bold mb-1\">نسبة العائد للمخاطرة (R:R 
+Ratio)</div><div class=\"font-mono text-blue-700 mb-1\">R:R = (Target - Entry) 
+/ (Entry - StopLoss)</div><div class=\"text-sm text-gray-700\">يجب أن تكون هذه 
+النسبة أكبر من 2 دائماً.</div></div></div>"
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\pattern-trainer.js:677:        
+trainerState.difficulty = e.target.value;
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\pattern-trainer.js:682:        
+trainerState.category = e.target.value;
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\course-viewer.js:148:        if (e.target 
+=== modal) closeCourseModal();
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\course-viewer.js:264:            <!-- Lesson 
+Actions -->
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:404:            
+this.addTransaction('شراء', ticker, quantity, executionPrice, totalCost);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:434:            
+this.addTransaction('بيع', ticker, quantity, executionPrice, totalValue);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:453:    
+addTransaction(type, ticker, shares, price, total) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:454:        
+learningStateV2.simulation.transactions.unshift({
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:529:        const 
+signal = this.calculateEMA([macd], 9); // مبسط
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:544:            macd: { 
+macd, signal, histogram: macd - signal },
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:547:            
+signals: {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\simulation-engine.js:551:                
+macdCross: macd > signal ? 'bullish' : 'bearish'
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-v2.js:38:        transactions: [],
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-v2.js:382:                          
+  indicatorConfig: { fast: 12, slow: 26, signal: 9 }
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-v2.js:689:            condition: 
+(state) => state.simulation.transactions.length >= 1
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:22:        transactions: []
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:796:        if (e.target === 
+modal) modal.remove();
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:821:        
+updateLivePriceDisplay(e.target.value);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1131:    if 
+(learningState.simulation.transactions.length >= 1) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1237:        if (e.target === 
+modal) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1451:        
+addTransaction('شراء', ticker, shares, price, total);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1468:        
+addTransaction('بيع', ticker, shares, price, total);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1480:function 
+addTransaction(type, ticker, shares, price, total) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1481:    
+learningState.simulation.transactions.unshift({
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1526:    const transEl = 
+document.getElementById('simTransactions');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1527:    if 
+(learningState.simulation.transactions.length === 0) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1530:        transEl.innerHTML = 
+learningState.simulation.transactions.slice(0, 10).map(t => `
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1573:        
+document.getElementById('calcCompoundResult').textContent = 
+amount.toLocaleString('en-US', {minimumFractionDigits: 2, 
+maximumFractionDigits: 2});
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning.js:1763:    
+modal.addEventListener('click', (e) => { if (e.target === modal) 
+modal.remove(); });
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:22:function 
+sanitizeRecommendationPayload(payload = {}) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:23:    const recommendation 
+= { ...(payload.recommendation || {}) };
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:24:    
+recommendation.summary_ar = normalizeTrustLanguage(recommendation.summary_ar 
+|| recommendation.reason_ar || '');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:25:    
+recommendation.reason_ar = normalizeTrustLanguage(recommendation.reason_ar || 
+recommendation.summary_ar || '');
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:27:    const 
+analysis_method = {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:28:        
+...(payload.analysis_method || {}),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:30:            
+payload.analysis_method?.display_label_ar || 'بناءً على المحللين والذكاء 
+الاصطناعي المساعد'
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:32:        core_engine: 
+normalizeTrustLanguage(payload.analysis_method?.core_engine || ''),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:33:        
+commentary_engine: 
+normalizeTrustLanguage(payload.analysis_method?.commentary_engine || ''),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:34:        
+probability_engine: 
+normalizeTrustLanguage(payload.analysis_method?.probability_engine || '')
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:39:        recommendation,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:40:        analysis_method,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:79:export function 
+normalizeRecommendationPayload(payload) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:85:        return 
+sanitizeRecommendationPayload(payload);
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:88:    const action = 
+(payload.recommendation || 'hold').toLowerCase();
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:89:    const actionMap = {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:100:    return 
+sanitizeRecommendationPayload({
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:102:        recommendation: 
+{
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:103:            action,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:104:            action_ar: 
+actionMap[action] || 'احتفاظ',
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:105:            
+confidence_score: toNumber(payload.confidence, 0.5),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:106:            
+confidence_label: 'medium',
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:107:            
+confidence_label_ar: 'متوسطة',
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:110:            
+key_strengths: reasons.slice(0, 2).map((text) => ({ title: text, title_ar: 
+text })),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:111:            key_risks: 
+reasons.slice(2, 4).map((text) => ({ title: text, title_ar: text })),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:112:            
+score_breakdown: {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:113:                
+total_score: toNumber(payload.confidence, 0.5) * 100,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:121:            
+total_score: toNumber(payload.confidence, 0.5) * 100,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:129:        key_strengths: 
+reasons.slice(0, 2).map((text) => ({ title: text, title_ar: text })),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\deep-analysis.js:130:        key_risks: 
+reasons.slice(2, 4).map((text) => ({ title: text, title_ar: text })),
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:163: * @param {Object} 
+recommendation - بيانات التوصية
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:167:export function 
+createRecommendationCard(recommendation, capital) {
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:169:        
+recommendation.allocation_percent ?? recommendation.allocation ?? 0
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:171:    const amount = 
+recommendation.allocation_amount !== undefined
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:172:        ? 
+Number(recommendation.allocation_amount)
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:178:                <h4 
+class="font-semibold text-gray-900">${recommendation.ticker}</h4>
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:179:                <p 
+class="text-sm text-gray-500">${recommendation.name || recommendation.sector 
+|| 'غير محدد'}</p>
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:180:                
+${recommendation.score !== undefined ? `<p class="text-xs text-gray-400 
+mt-1">درجة التحليل: ${Number(recommendation.score).toFixed(1)}</p>` : ''}
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:235:        return 
+n.toLocaleString('en-US', { minimumFractionDigits: decimals, 
+maximumFractionDigits: decimals });
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:254:    const maxFractionDigits = 
+absValue > 0 && absValue < 1 ? 5 : 2;
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:257:        minimumFractionDigits: 
+2,
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\utils.js:258:        maximumFractionDigits: 
+maxFractionDigits
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-ui.js:250:                <!-- 
+Action Button -->
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-ui.js:458:                <!-- 
+Recent Transactions -->
+\\wsl.localhost\Ubuntu\home\meme\my apps\investment_fullstack-main\investment_f
+ullstack-main\frontend\js\modules\learning-ui.js:461:                    <div 
+id="simTransactions" class="space-y-2 max-h-48 overflow-y-auto">
+
+

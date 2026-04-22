@@ -1,0 +1,111 @@
+
+    const indices = [
+        { symbol: 'EGX30', name: 'EGX 30 Index', value: 18045.5, previous_close: 18000, change: 45.5, change_percent: 0.25 },
+        { symbol: 'EGX50', name: 'EGX 50 Index', value: 19109, previous_close: 19200, change: -91, change_percent: -0.47 },
+        { symbol: 'EGX70', name: 'EGX 70 Index', value: 20536.5, previous_close: 20400, change: 136.5, change_percent: 0.67 },
+        { symbol: 'EGX100', name: 'EGX 100 Index', value: 21418, previous_close: 21600, change: -182, change_percent: -0.84 },
+        { symbol: 'EGX33', name: 'EGX 33 Shariah Index', value: 23027.5, previous_close: 22800, change: 227.5, change_percent: 1.0 }
+    ].map((idx) => ({ ...idx, last_updated: new Date().toISOString() }));
+
+    return {
+        market_status: getScheduleStatus(),
+        summary: {
+            total_stocks: totalStocks,
+            gainers,
+            losers,
+            unchanged,
+            egx30_stocks: stocks.filter((s) => s.egx30_member).length,
+            egx70_stocks: stocks.filter((s) => s.egx70_member).length,
+            egx100_stocks: stocks.filter((s) => s.egx100_member).length,
+            egx30_value: indices.find((idx) => idx.symbol === 'EGX30')?.value || 0
+        },
+        indices,
+        top_gainers: sortedByChange.slice(0, 5).map((s) => ({ ticker: s.ticker, name: s.name, name_ar: s.name_ar, current_price: s.current_price, price_change: s.getPriceChange() })),
+        top_losers: sortedByChange.slice(-5).reverse().map((s) => ({ ticker: s.ticker, name: s.name, name_ar: s.name_ar, current_price: s.current_price, price_change: s.getPriceChange() })),
+        most_active: sortedByVolume.slice(0, 5).map((s) => ({ ticker: s.ticker, name: s.name, name_ar: s.name_ar, current_price: s.current_price, volume: s.volume })),
+        last_updated: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+function mapMetalQuote(quote, name, nameAr) {
+    if (!quote) {
+        return {
+            metal: String(name || '').toLowerCase(),
+            name,
+            name_ar: nameAr,
+            price: null,
+            price_per_gram_egp: null,
+            unit: 'EGP/gram',
+            source: null,
+            available: false,
+            note: 'Temporarily unavailable',
+            bars: null
+        };
+    }
+
+    const historyPreview = getMetalHistory(quote.metal, 'day').slice(-12).map((point) => ({
+        time: point.fetched_at,
+        value: Number(toNumber(point.price_per_gram_egp, 0).toFixed(2))
+    }));
+
+    return {
+        metal: quote.metal,
+        name,
+        name_ar: nameAr,
+        price: Number(toNumber(quote.price_per_gram_egp, 0).toFixed(2)),
+        price_per_gram_egp: Number(toNumber(quote.price_per_gram_egp, 0).toFixed(2)),
+        usd_per_ounce: Number(toNumber(quote.usd_per_ounce, 0).toFixed(2)),
+        usd_egp_rate: Number(toNumber(quote.usd_egp_rate, 0).toFixed(4)),
+        gram24kEgp: Number(toNumber(quote.gram24kEgp ?? quote.price_per_gram_egp, 0).toFixed(2)),
+        gram21kEgp: Number(toNumber(quote.gram21kEgp, 0).toFixed(2)),
+        gram18kEgp: Number(toNumber(quote.gram18kEgp, 0).toFixed(2)),
+        gram16kEgp: Number(toNumber(quote.gram16kEgp, 0).toFixed(2)),
+        gramEgp: Number(toNumber(quote.gramEgp ?? quote.price_per_gram_egp, 0).toFixed(2)),
+        ounceEgp: Number(toNumber(quote.ounceEgp, 0).toFixed(2)),
+        kiloEgp: Number(toNumber(quote.kiloEgp, 0).toFixed(2)),
+        bars: quote.bars || null,
+        history_preview: historyPreview,
+        unit: 'EGP/gram',
+        source: quote.source,
+        available: true,
+        note: 'Updates every 5 minutes, 24/7',
+        fetched_at: quote.fetched_at
+    };
+}
+
+async function getMetalsMarketSnapshot() {
+    const cachedGoldQuote = getCachedMetalQuote('gold');
+    const cachedSilverQuote = getCachedMetalQuote('silver');
+
+    const goldQuotePromise = cachedGoldQuote
+        ? Promise.resolve(cachedGoldQuote)
+        : fetchMetalPricePerGramEgp('gold').catch(() => null);
+    const silverQuotePromise = cachedSilverQuote
+        ? Promise.resolve(cachedSilverQuote)
+        : fetchMetalPricePerGramEgp('silver').catch(() => null);
+
+    const [goldQuote, silverQuote] = await Promise.all([goldQuotePromise, silverQuotePromise]);
+
+    if (cachedGoldQuote) {
+        fetchMetalPricePerGramEgp('gold').catch(() => null);
+    }
+    if (cachedSilverQuote) {
+        fetchMetalPricePerGramEgp('silver').catch(() => null);
+    }
+
+    return {
+        gold: mapMetalQuote(goldQuote, 'Gold', 'الذهب'),
+        silver: mapMetalQuote(silverQuote, 'Silver', 'الفضة')
+    };
+}
+
+/**
+ * @route GET /api/market/overview
+ * @desc Get market overview
+ */
+router.get('/overview', optionalAuth, async (req, res) => {
+    try {
+        const [stocks, indices, metals] = await Promise.all([
+            Stock.findAll({
+                where: { is_active: true, is_egx: true }

@@ -1,0 +1,179 @@
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../config/app_config.dart';
+
+class ApiService {
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+
+  late final Dio _dio;
+  String? _token;
+
+  ApiService._internal() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: '${AppConfig.apiBaseUrl}${AppConfig.apiVersion}',
+        connectTimeout: AppConfig.connectTimeout,
+        receiveTimeout: AppConfig.receiveTimeout,
+        sendTimeout: AppConfig.sendTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    _dio.interceptors.addAll([
+      _AuthInterceptor(this),
+      _LoggingInterceptor(),
+    ]);
+  }
+
+  void setToken(String token) {
+    _token = token;
+  }
+
+  void clearToken() {
+    _token = null;
+  }
+
+  Future<String?> getToken() async {
+    if (_token != null) return _token;
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('auth_token');
+    return _token;
+  }
+
+  // GET request
+  Future<Response<dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    return _dio.get(
+      path,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
+  // POST request
+  Future<Response<dynamic>> post(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    return _dio.post(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
+  // PUT request
+  Future<Response<dynamic>> put(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    return _dio.put(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
+  // DELETE request
+  Future<Response<dynamic>> delete(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    return _dio.delete(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
+  // Download file
+  Future<Response<dynamic>> download(String urlPath, String savePath) async {
+    return _dio.download(urlPath, savePath);
+  }
+}
+
+class _AuthInterceptor extends Interceptor {
+  final ApiService _apiService;
+  _AuthInterceptor(this._apiService);
+
+  @override
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await _apiService.getToken();
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final refreshToken = prefs.getString('refresh_token');
+        if (refreshToken != null) {
+          final response = await Dio().post(
+            '${AppConfig.apiBaseUrl}${AppConfig.apiVersion}/auth/refresh',
+            data: {'refreshToken': refreshToken},
+          );
+          if (response.statusCode == 200) {
+            final newToken = response.data['token'] as String?;
+            if (newToken != null) {
+              await prefs.setString('auth_token', newToken);
+              _apiService.setToken(newToken);
+
+              // Retry original request
+              err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+              final retryResponse = await Dio().fetch(err.requestOptions);
+              handler.resolve(retryResponse);
+              return;
+            }
+          }
+        }
+      } catch (_) {
+        // Refresh token failed, need to re-login
+      }
+      // Clear tokens and redirect to login
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      _apiService.clearToken();
+    }
+    handler.next(err);
+  }
+}
+
+class _LoggingInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Log for debugging in development
+    handler.next(options);
+  }
+
+  @override
+  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
+    handler.next(response);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    handler.next(err);
+  }
+}

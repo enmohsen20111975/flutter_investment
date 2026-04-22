@@ -1,0 +1,1072 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:in_app_update/in_app_update.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+  await NotificationService.instance.initialize();
+  await NotificationService.instance.scheduleFirstLaunchNotification();
+  await UpdateService.checkForUpdate();
+  runApp(const InvestmentApp());
+}
+
+class AppConfig {
+  static const String appName = 'EGX Investment';
+  static const String baseUrl = 'https://invist.m2y.net/api';
+  static const String admobAppId = 'ca-app-pub-7305205048390136~2636682520';
+  static const String bannerAdUnitId = 'ca-app-pub-7305205048390136/5344839989';
+  static const String interstitialAdUnitId = 'ca-app-pub-7305205048390136/2664602684';
+}
+
+Map<String, dynamic> asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    return value.map((key, dynamicValue) => MapEntry(key.toString(), dynamicValue));
+  }
+  return <String, dynamic>{};
+}
+
+double toDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+class AuthSession {
+  const AuthSession({
+    required this.apiKey,
+    required this.username,
+    required this.email,
+  });
+
+  final String apiKey;
+  final String username;
+  final String email;
+
+  factory AuthSession.fromJson(Map<String, dynamic> json) {
+    final user = asMap(json['user']);
+    return AuthSession(
+      apiKey: json['api_key']?.toString() ?? '',
+      username: user['username']?.toString() ?? 'Investor',
+      email: user['email']?.toString() ?? '',
+    );
+  }
+}
+
+class StockItem {
+  const StockItem({
+    required this.ticker,
+    required this.name,
+    required this.price,
+    required this.change,
+    required this.complianceStatus,
+  });
+
+  final String ticker;
+  final String name;
+  final double price;
+  final double change;
+  final String complianceStatus;
+
+  factory StockItem.fromJson(Map<String, dynamic> json) {
+    return StockItem(
+      ticker: json['ticker']?.toString() ?? '--',
+      name: json['name']?.toString() ?? 'Unknown stock',
+      price: toDouble(json['current_price']),
+      change: toDouble(json['price_change']),
+      complianceStatus: json['compliance_status']?.toString() ?? 'unknown',
+    );
+  }
+}
+
+class RecommendationItem {
+  const RecommendationItem({
+    required this.ticker,
+    required this.name,
+    required this.allocationAmount,
+    required this.allocationPercent,
+  });
+
+  final String ticker;
+  final String name;
+  final double allocationAmount;
+  final double allocationPercent;
+
+  factory RecommendationItem.fromJson(Map<String, dynamic> json) {
+    return RecommendationItem(
+      ticker: json['ticker']?.toString() ?? '--',
+      name: json['name']?.toString() ?? 'Recommendation',
+      allocationAmount: toDouble(json['allocation_amount']),
+      allocationPercent: toDouble(json['allocation_percent']),
+    );
+  }
+}
+
+class ApiService {
+  ApiService()
+      : _dio = Dio(
+          BaseOptions(
+            baseUrl: AppConfig.baseUrl,
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 20),
+            headers: const {'Content-Type': 'application/json'},
+          ),
+        ) {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final apiKey = await _storage.read(key: 'api_key');
+          if (apiKey != null && apiKey.isNotEmpty) {
+            options.headers['X-API-Key'] = apiKey;
+          }
+          handler.next(options);
+        },
+      ),
+    );
+  }
+
+  final Dio _dio;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+
+  Future<AuthSession> login({
+    required String usernameOrEmail,
+    required String password,
+  }) async {
+    final response = await _dio.post(
+      '/auth/login',
+      data: {
+        'username_or_email': usernameOrEmail,
+        'password': password,
+        'key_name': 'Android Release Session',
+        'expires_in_days': 30,
+      },
+    );
+
+    final session = AuthSession.fromJson(asMap(response.data));
+    await _storage.write(key: 'api_key', value: session.apiKey);
+    await _storage.write(key: 'username', value: session.username);
+    await _storage.write(key: 'email', value: session.email);
+    return session;
+  }
+
+  Future<AuthSession?> restoreSession() async {
+    final apiKey = await _storage.read(key: 'api_key');
+    if (apiKey == null || apiKey.isEmpty) return null;
+
+    final storedUsername = await _storage.read(key: 'username') ?? 'Investor';
+    final storedEmail = await _storage.read(key: 'email') ?? '';
+
+    try {
+      final response = await _dio.get('/auth/me');
+      final user = asMap(response.data);
+      return AuthSession(
+        apiKey: apiKey,
+        username: user['username']?.toString() ?? storedUsername,
+        email: user['email']?.toString() ?? storedEmail,
+      );
+    } on DioException {
+      return AuthSession(
+        apiKey: apiKey,
+        username: storedUsername,
+        email: storedEmail,
+      );
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await _dio.post('/auth/logout');
+    } catch (_) {
+      // Ignore server logout failures and clear the local session anyway.
+    }
+    await _storage.deleteAll();
+  }
+
+  Future<Map<String, dynamic>> getMarketOverview() async {
+    final response = await _dio.get('/market/overview');
+    return asMap(response.data);
+  }
+
+  Future<List<StockItem>> getStocks() async {
+    final response = await _dio.get(
+      '/stocks',
+      queryParameters: const {'page': 1, 'page_size': 10},
+    );
+    final data = asMap(response.data);
+    final rawStocks = (data['stocks'] as List?) ?? <dynamic>[];
+    return rawStocks.map((item) => StockItem.fromJson(asMap(item))).toList();
+  }
+
+  Future<Map<String, dynamic>?> getFinancialSummary() async {
+    try {
+      final response = await _dio.get('/user/financial-summary');
+      return asMap(response.data);
+    } on DioException {
+      return null;
+    }
+  }
+
+  Future<List<RecommendationItem>> getRecommendations() async {
+    try {
+      final response = await _dio.get(
+        '/portfolio/recommend',
+        queryParameters: const {
+          'capital': 100000,
+          'risk': 'medium',
+          'max_stocks': 4,
+        },
+      );
+      final data = asMap(response.data);
+      final rawItems = (data['recommendations'] as List?) ?? <dynamic>[];
+      return rawItems
+          .map((item) => RecommendationItem.fromJson(asMap(item)))
+          .toList();
+    } on DioException {
+      return <RecommendationItem>[];
+    }
+  }
+}
+
+class NotificationService {
+  NotificationService._();
+
+  static final NotificationService instance = NotificationService._();
+
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
+
+  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+    'investment_updates',
+    'Investment Updates',
+    description: 'Status updates and reminders for EGX investment users.',
+    importance: Importance.high,
+  );
+
+  bool _ready = false;
+
+  Future<void> initialize() async {
+    if (_ready) return;
+
+    tz.initializeTimeZones();
+
+    const settings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    );
+
+    await _notifications.initialize(settings);
+
+    final androidImplementation = _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.createNotificationChannel(_channel);
+
+    _ready = true;
+  }
+
+  Future<void> scheduleFirstLaunchNotification() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyScheduled = prefs.getBool('first_launch_notification_sent') ?? false;
+    if (alreadyScheduled) return;
+
+    await _notifications.zonedSchedule(
+      1001,
+      'Investment app ready',
+      'Live market sync, website sign-in, and update checks are enabled.',
+      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'investment_updates',
+          'Investment Updates',
+          channelDescription: 'Status updates and reminders for EGX investment users.',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+
+    await prefs.setBool('first_launch_notification_sent', true);
+  }
+
+  Future<void> showStatusNotification({
+    required String title,
+    required String body,
+  }) async {
+    await _notifications.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'investment_updates',
+          'Investment Updates',
+          channelDescription: 'Status updates and reminders for EGX investment users.',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  }
+
+  Future<void> maybeNotifyMarketStatus(String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastMessage = prefs.getString('last_market_message');
+    if (lastMessage == message) return;
+
+    await showStatusNotification(
+      title: 'Market status update',
+      body: message,
+    );
+    await prefs.setString('last_market_message', message);
+  }
+
+  Future<void> maybeNotifyInvestmentSummary(Map<String, dynamic> summary) async {
+    final totalValue = toDouble(summary['total_value']);
+    final gainLoss = toDouble(summary['total_gain_loss']);
+    final message = gainLoss >= 0
+        ? 'Portfolio value: EGP ${totalValue.toStringAsFixed(0)} with gain EGP ${gainLoss.toStringAsFixed(0)}.'
+        : 'Portfolio value: EGP ${totalValue.toStringAsFixed(0)} with loss EGP ${gainLoss.abs().toStringAsFixed(0)}.';
+
+    final prefs = await SharedPreferences.getInstance();
+    final lastMessage = prefs.getString('last_investment_message');
+    if (lastMessage == message) return;
+
+    await showStatusNotification(
+      title: 'Investment status changed',
+      body: message,
+    );
+    await prefs.setString('last_investment_message', message);
+  }
+}
+
+class UpdateService {
+  static Future<void> checkForUpdate() async {
+    if (!Platform.isAndroid) return;
+
+    try {
+      final result = await InAppUpdate.checkForUpdate();
+      if (result.updateAvailability == UpdateAvailability.updateAvailable) {
+        await InAppUpdate.startFlexibleUpdate();
+        await InAppUpdate.completeFlexibleUpdate();
+      }
+    } catch (_) {
+      // In-app updates only work for Play Store installs. Ignore locally.
+    }
+  }
+}
+
+class InvestmentApp extends StatelessWidget {
+  const InvestmentApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: AppConfig.appName,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0A7E8C),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      home: const DashboardPage(),
+    );
+  }
+}
+
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  final ApiService _api = ApiService();
+  final NumberFormat _currency = NumberFormat.currency(symbol: 'EGP ');
+  final NumberFormat _compact = NumberFormat.compact();
+
+  AuthSession? _session;
+  Map<String, dynamic>? _overview;
+  Map<String, dynamic>? _financialSummary;
+  List<StockItem> _stocks = <StockItem>[];
+  List<RecommendationItem> _recommendations = <RecommendationItem>[];
+  bool _booting = true;
+  bool _loading = false;
+  String? _errorMessage;
+  InterstitialAd? _interstitialAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInterstitialAd();
+    _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _bootstrap() async {
+    final session = await _api.restoreSession();
+    if (!mounted) return;
+
+    setState(() {
+      _session = session;
+      _booting = false;
+    });
+
+    await _loadDashboard(showLoader: true);
+  }
+
+  Future<void> _loadDashboard({bool showLoader = false}) async {
+    if (showLoader && mounted) {
+      setState(() {
+        _loading = true;
+        _errorMessage = null;
+      });
+    }
+
+    try {
+      final overview = await _api.getMarketOverview();
+      final stocks = await _api.getStocks();
+      final marketStatus = asMap(overview['market_status']);
+      final marketMessage = marketStatus['message']?.toString();
+
+      Map<String, dynamic>? summary;
+      List<RecommendationItem> recommendations = <RecommendationItem>[];
+
+      if (_session != null) {
+        summary = await _api.getFinancialSummary();
+        recommendations = await _api.getRecommendations();
+        if (summary != null) {
+          await NotificationService.instance.maybeNotifyInvestmentSummary(summary);
+        }
+      }
+
+      if (marketMessage != null && marketMessage.isNotEmpty) {
+        await NotificationService.instance.maybeNotifyMarketStatus(marketMessage);
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _overview = overview;
+        _stocks = stocks;
+        _financialSummary = summary;
+        _recommendations = recommendations;
+        _loading = false;
+      });
+    } on DioException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorMessage = error.response?.data is Map<String, dynamic>
+            ? (error.response?.data['message']?.toString() ?? 'Could not load live website data.')
+            : (error.message ?? 'Could not load live website data.');
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorMessage = error.toString();
+      });
+    }
+  }
+
+  Future<void> _login(String usernameOrEmail, String password) async {
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final session = await _api.login(
+        usernameOrEmail: usernameOrEmail,
+        password: password,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _session = session;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Signed in as ${session.username}')),
+      );
+
+      await _loadDashboard(showLoader: true);
+    } on DioException catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.response?.data is Map<String, dynamic>
+                ? (error.response?.data['message']?.toString() ?? 'Login failed')
+                : (error.message ?? 'Login failed'),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _logout() async {
+    await _api.logout();
+    if (!mounted) return;
+
+    setState(() {
+      _session = null;
+      _financialSummary = null;
+      _recommendations = <RecommendationItem>[];
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Website session removed from the app.')),
+    );
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AppConfig.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _interstitialAd?.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              _loadInterstitialAd();
+            },
+            onAdFailedToShowFullScreenContent: (ad, _) {
+              ad.dispose();
+              _loadInterstitialAd();
+            },
+          );
+        },
+        onAdFailedToLoad: (_) {
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd?.show();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Interstitial ad is still loading.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_booting) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final marketStatus = asMap(_overview?['market_status']);
+    final summary = asMap(_overview?['summary']);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(AppConfig.appName),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh live data',
+            onPressed: _loading ? null : () => _loadDashboard(showLoader: true),
+            icon: const Icon(Icons.refresh),
+          ),
+          if (_session != null)
+            IconButton(
+              tooltip: 'Logout',
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+            ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showInterstitialAd,
+        icon: const Icon(Icons.announcement_outlined),
+        label: const Text('Interstitial'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => _loadDashboard(showLoader: false),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _buildHeroCard(),
+            const SizedBox(height: 12),
+            if (_session == null)
+              LoginCard(
+                busy: _loading,
+                onLogin: _login,
+              )
+            else
+              _buildSignedInCard(),
+            const SizedBox(height: 12),
+            const InlineBannerAd(),
+            const SizedBox(height: 12),
+            if (_loading) const LinearProgressIndicator(),
+            if (_errorMessage != null) ...[
+              _MessageCard(
+                title: 'Connection notice',
+                message: _errorMessage!,
+                color: Colors.orange.shade100,
+              ),
+              const SizedBox(height: 12),
+            ],
+            _SectionCard(
+              title: 'Market overview',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    marketStatus['message']?.toString() ?? 'Waiting for live market status...',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _MetricChip(
+                        label: 'Open now',
+                        value: (marketStatus['is_open'] == true) ? 'Yes' : 'No',
+                      ),
+                      _MetricChip(
+                        label: 'EGX30',
+                        value: toDouble(summary['egx30_value']) == 0
+                            ? '--'
+                            : _currency.format(toDouble(summary['egx30_value'])),
+                      ),
+                      _MetricChip(
+                        label: 'Total stocks',
+                        value: _compact.format(toDouble(summary['total_stocks'])),
+                      ),
+                    ],
+                  ),
+                  if ((marketStatus['current_time_cairo']?.toString() ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text('Cairo time: ${marketStatus['current_time_cairo']}'),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _SectionCard(
+              title: 'Live stocks from website',
+              child: _stocks.isEmpty
+                  ? const Text('No stock data received yet.')
+                  : Column(
+                      children: _stocks
+                          .map(
+                            (stock) => ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: CircleAvatar(
+                                child: Text(stock.ticker.substring(0, stock.ticker.length.clamp(0, 2))),
+                              ),
+                              title: Text('${stock.ticker} • ${stock.name}'),
+                              subtitle: Text('Compliance: ${stock.complianceStatus}'),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(_currency.format(stock.price)),
+                                  Text(
+                                    '${stock.change >= 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      color: stock.change >= 0 ? Colors.green : Colors.red,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+            ),
+            const SizedBox(height: 12),
+            if (_session != null)
+              _SectionCard(
+                title: 'Investment status alerts',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _financialSummary == null
+                          ? 'Sign-in works, but the account has not returned a portfolio summary yet.'
+                          : 'Local push-style notifications are active for market and portfolio status changes.',
+                    ),
+                    const SizedBox(height: 8),
+                    if (_financialSummary != null)
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          _MetricChip(
+                            label: 'Total value',
+                            value: _currency.format(toDouble(_financialSummary?['total_value'])),
+                          ),
+                          _MetricChip(
+                            label: 'Gain / loss',
+                            value: _currency.format(toDouble(_financialSummary?['total_gain_loss'])),
+                          ),
+                          _MetricChip(
+                            label: 'Halal %',
+                            value: '${toDouble(_financialSummary?['halal_percent']).toStringAsFixed(1)}%',
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            if (_session != null) const SizedBox(height: 12),
+            if (_session != null)
+              _SectionCard(
+                title: 'Suggested allocations',
+                child: _recommendations.isEmpty
+                    ? const Text('Portfolio recommendations will appear here after website authorization returns data.')
+                    : Column(
+                        children: _recommendations
+                            .map(
+                              (item) => ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text('${item.ticker} • ${item.name}'),
+                                subtitle: Text('${item.allocationPercent.toStringAsFixed(1)}% allocation'),
+                                trailing: Text(_currency.format(item.allocationAmount)),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        gradient: LinearGradient(
+          colors: [Color(0xFF0A7E8C), Color(0xFF18A0A8)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'Android release dashboard',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'AdMob, in-app updates, signed website access, and investment status notifications are included.',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignedInCard() {
+    return _SectionCard(
+      title: 'Website session',
+      child: Row(
+        children: [
+          const CircleAvatar(child: Icon(Icons.person)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _session?.username ?? 'Investor',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(_session?.email.isNotEmpty == true ? _session!.email : 'Website API key stored securely'),
+              ],
+            ),
+          ),
+          FilledButton(
+            onPressed: _showInterstitialAd,
+            child: const Text('Show ad'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoginCard extends StatefulWidget {
+  const LoginCard({
+    required this.busy,
+    required this.onLogin,
+    super.key,
+  });
+
+  final bool busy;
+  final Future<void> Function(String usernameOrEmail, String password) onLogin;
+
+  @override
+  State<LoginCard> createState() => _LoginCardState();
+}
+
+class _LoginCardState extends State<LoginCard> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      title: 'Sign in with the website',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Email or username',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Enter your website email or username'
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Enter your password'
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: widget.busy
+                    ? null
+                    : () async {
+                        if (_formKey.currentState?.validate() != true) return;
+                        await widget.onLogin(
+                          _usernameController.text.trim(),
+                          _passwordController.text,
+                        );
+                      },
+                icon: const Icon(Icons.login),
+                label: const Text('Sign in'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InlineBannerAd extends StatefulWidget {
+  const InlineBannerAd({super.key});
+
+  @override
+  State<InlineBannerAd> createState() => _InlineBannerAdState();
+}
+
+class _InlineBannerAdState extends State<InlineBannerAd> {
+  BannerAd? _bannerAd;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bannerAd = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AppConfig.bannerAdUnitId,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          if (mounted) {
+            setState(() => _loaded = true);
+          }
+        },
+        onAdFailedToLoad: (ad, _) {
+          ad.dispose();
+        },
+      ),
+      request: const AdRequest(),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded || _bannerAd == null) {
+      return const _MessageCard(
+        title: 'Sponsored section',
+        message: 'AdMob banner is configured and will appear here on device.',
+      );
+    }
+
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SizedBox(
+        width: _bannerAd!.size.width.toDouble(),
+        height: _bannerAd!.size.height.toDouble(),
+        child: AdWidget(ad: _bannerAd!),
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.title,
+    required this.child,
+  });
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MessageCard extends StatelessWidget {
+  const _MessageCard({
+    required this.title,
+    required this.message,
+    this.color,
+  });
+
+  final String title;
+  final String message;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color ?? Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(message),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricChip extends StatelessWidget {
+  const _MetricChip({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}

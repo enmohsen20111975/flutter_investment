@@ -1,0 +1,91 @@
+name: egx_investment_app
+description: EGX Egyptian Stock Exchange Investment Platform - Mobile App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+
+  # HTTP & API
+  dio: ^5.4.0
+  connectivity_plus: ^5.0.2
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # UI Components
+  flutter_screenutil: ^5.9.0
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.9
+  lottie: ^2.7.0
+
+  # Charts
+  fl_chart: ^0.66.0
+
+  # Icons
+  iconsax: ^0.0.8
+  flutter_iconpicker: ^3.2.4
+
+  # Auth
+  local_auth: ^2.1.8
+
+  # Notifications
+  flutter_local_notifications: ^18.0.0
+  firebase_messaging: ^14.8.1
+  firebase_core: ^2.28.0
+
+  # Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.0.0
+
+  # Ads
+  google_mobile_ads: ^5.0.0
+
+  # Auth
+  google_sign_in: ^6.2.0
+
+  # Updates
+  in_app_update: ^4.2.1
+
+  # UI Components
+  auto_size_text: ^3.0.0
+  path_provider: ^2.1.1
+
+  # WebSocket
+  web_socket_channel: ^2.4.0
+
+  # Theme
+  google_fonts: ^6.1.0
+
+  # Utils
+  intl: ^0.20.2
+  currency_text_input_formatter: ^2.1.11
+  pull_to_refresh_flutter3: ^2.0.2
+  infinite_scroll_pagination: ^4.0.0
+  share_plus: ^7.2.1
+  url_launcher: ^6.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.7
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/fonts/
