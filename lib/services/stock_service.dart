@@ -16,12 +16,24 @@ class StockService {
     String? search,
   }) async {
     try {
+      String? apiSort;
+      if (sort != null) {
+        switch (sort) {
+          case 'الأكثر تداولاً': apiSort = 'volume'; break;
+          case 'أعلى سعر': apiSort = 'price_desc'; break;
+          case 'أقل سعر': apiSort = 'price_asc'; break;
+          case 'أكبر ربح': apiSort = 'gainers'; break;
+          case 'أكبر خسارة': apiSort = 'losers'; break;
+          default: apiSort = sort;
+        }
+      }
+
       final queryParams = <String, dynamic>{
         'page': page,
-        'limit': limit,
+        'page_size': limit,
         if (sector != null && sector != 'الكل') 'sector': sector,
-        if (sort != null) 'sort': sort,
-        if (search != null) 'search': search,
+        if (apiSort != null) 'sort': apiSort,
+        if (search != null) 'query': search,
       };
 
       final response = await _api.get(
@@ -40,7 +52,7 @@ class StockService {
   Future<Stock> getStockDetail(String symbol) async {
     try {
       final response = await _api.get('${AppConstants.stockDetailEndpoint}/$symbol');
-      return Stock.fromJson((response.data['stock'] ?? response.data) as Map<String, dynamic>);
+      return Stock.fromJson((response.data['data'] ?? response.data['stock'] ?? response.data) as Map<String, dynamic>);
     } catch (e) {
       throw Exception('فشل في تحميل بيانات السهم');
     }
@@ -66,8 +78,8 @@ class StockService {
   Future<List<Stock>> searchStocks(String query) async {
     try {
       final response = await _api.get(
-        AppConstants.stockSearchEndpoint,
-        queryParameters: {'q': query},
+        AppConstants.stocksEndpoint,
+        queryParameters: {'query': query},
       );
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
@@ -139,12 +151,12 @@ class StockService {
     }
   }
 
-  /// Get market news
-  Future<List<NewsArticle>> getMarketNews({int page = 1, int limit = 10}) async {
+  /// Get stock news
+  Future<List<NewsArticle>> getStockNews(String ticker, {int limit = 10}) async {
     try {
       final response = await _api.get(
-        AppConstants.newsEndpoint,
-        queryParameters: {'page': page, 'limit': limit},
+        '${AppConstants.newsEndpoint}'.replaceAll('/news', '/stocks/$ticker/news'),
+        queryParameters: {'limit': limit},
       );
       final List<dynamic> data = ((response.data['news'] ?? response.data) as List<dynamic>);
       return data.map((e) => NewsArticle.fromJson(e as Map<String, dynamic>)).toList();

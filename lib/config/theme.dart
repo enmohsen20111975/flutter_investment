@@ -1,35 +1,36 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Brand Colors
-  static const Color primaryColor = Color(0xFF1B5E20);       // Deep Green
+  // Brand Colors - Ultra Modern Palette
+  static const Color primaryColor = Color(0xFF10B981);       // Neon Emerald Green
   static const Color primary = primaryColor;
-  static const Color primaryLight = Color(0xFF4CAF50);       // Light Green
-  static const Color primaryDark = Color(0xFF0D3B12);        // Dark Green
-  static const Color accentColor = Color(0xFFFFB300);         // Gold Accent
-  static const Color accentLight = Color(0xFFFFD54F);        // Light Gold
-  static const Color successColor = Color(0xFF2E7D32);        // Green (Profit)
-  static const Color dangerColor = Color(0xFFC62828);         // Red (Loss)
-  static const Color warningColor = Color(0xFFF57F17);        // Warning
-  static const Color infoColor = Color(0xFF1565C0);           // Info Blue
+  static const Color primaryLight = Color(0xFF34D399);       // Light Emerald
+  static const Color primaryDark = Color(0xFF047857);        // Dark Emerald
+  static const Color accentColor = Color(0xFF3B82F6);         // Electric Blue
+  static const Color accentLight = Color(0xFF60A5FA);        // Light Blue
+  static const Color successColor = Color(0xFF10B981);        // Vibrant Green (Profit)
+  static const Color dangerColor = Color(0xFFEF4444);         // Vibrant Red (Loss)
+  static const Color warningColor = Color(0xFFF59E0B);        // Amber
+  static const Color infoColor = Color(0xFF3B82F6);           // Info Blue
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF1A1A2E);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textHint = Color(0xFF9CA3AF);
+  static const Color textPrimary = Color(0xFFF8FAFC);
+  static const Color textSecondary = Color(0xFF94A3B8);
+  static const Color textHint = Color(0xFF64748B);
 
-  // Background Colors
-  static const Color scaffoldLight = Color(0xFFF8FAFC);
-  static const Color scaffoldDark = Color(0xFF0F172A);
-  static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color cardDark = Color(0xFF1E293B);
-  static const Color surfaceLight = Color(0xFFF1F5F9);
-  static const Color surfaceDark = Color(0xFF334155);
+  // Background Colors - Sleek Dark Theme
+  static const Color scaffoldDark = Color(0xFF09090B);       // Near Black
+  static const Color scaffoldLight = Color(0xFFFAFAFA);      // Off White
+  static const Color cardDark = Color(0xFF18181B);           // Dark Gray/Black Surface
+  static const Color cardLight = Color(0xFFFFFFFF);          // White
+  static const Color surfaceDark = Color(0xFF27272A);        // Slightly lighter gray
+  static const Color surfaceLight = Color(0xFFF4F4F5);       // Light gray surface
+  
   static const Color textColor = textPrimary;
   static const Color textColorDark = Colors.white;
-  static const Color background = scaffoldLight;
-  static const Color backgroundColor = scaffoldLight;
-  static const Color surfaceColor = surfaceLight;
+  static const Color background = scaffoldDark;
+  static const Color backgroundColor = scaffoldDark;
+  static const Color surfaceColor = surfaceDark;
   static const Color gain = successColor;
   static const Color loss = dangerColor;
 

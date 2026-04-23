@@ -117,12 +117,19 @@ class StockProvider extends ChangeNotifier {
   }
 
   /// Load news
-  Future<void> loadNews() async {
+  Future<void> loadNews([String? ticker]) async {
     _isLoadingNews = true;
     notifyListeners();
 
     try {
-      _news = await _stockService.getMarketNews();
+      if (ticker != null) {
+        _news = await _stockService.getStockNews(ticker);
+      } else if (_selectedStock != null) {
+        _news = await _stockService.getStockNews(_selectedStock!.symbol);
+      } else {
+        // Fallback for general market news (uses COMI as representative stock)
+        _news = await _stockService.getStockNews('COMI');
+      }
     } catch (_) {
       _news = [];
     } finally {

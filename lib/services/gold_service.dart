@@ -1,26 +1,30 @@
-import 'package:dio/dio.dart';
-
 import '../models/gold_price.dart';
-import '../config/app_config.dart';
+import '../utils/constants.dart';
+import 'api_service.dart';
 
 class GoldService {
-  final Dio _dio = Dio();
+  final ApiService _api = ApiService();
 
-  /// Get gold price in USD
+  Future<Map<String, dynamic>> _fetchGoldData() async {
+    final response = await _api.get(AppConstants.goldPriceEndpoint);
+    return response.data['prices'] as Map<String, dynamic>? ?? {};
+  }
+
+  /// Get gold price in USD (Ounce)
   Future<double> getGoldPriceUsd() async {
     try {
-      final response = await _dio.get(AppConfig.goldApiUrl);
-      return ((response.data['price'] ?? 0) as num).toDouble();
+      final prices = await _fetchGoldData();
+      return (prices['ounce']?['price'] as num?)?.toDouble() ?? 0.0;
     } catch (e) {
       return 0.0;
     }
   }
 
-  /// Get silver price in USD
+  /// Get silver price in USD (Ounce)
   Future<double> getSilverPriceUsd() async {
     try {
-      final response = await _dio.get(AppConfig.silverApiUrl);
-      return ((response.data['price'] ?? 0) as num).toDouble();
+      final prices = await _fetchGoldData();
+      return (prices['silver_ounce']?['price'] as num?)?.toDouble() ?? 0.0;
     } catch (e) {
       return 0.0;
     }
@@ -29,31 +33,28 @@ class GoldService {
   /// Get USD to EGP exchange rate
   Future<double> getUsdToEgpRate() async {
     try {
-      final response = await _dio.get(AppConfig.currencyApiUrl);
-      final rates = response.data['rates'];
-      return ((rates['EGP'] ?? 0) as num).toDouble();
+      final response = await _api.get(AppConstants.currencyEndpoint);
+      final rate = response.data['central_bank_rate'] as num?;
+      return rate?.toDouble() ?? 48.0;
     } catch (e) {
-      return 48.0; // Default fallback rate
+      return 48.0;
     }
   }
 
-  /// Get gold price in EGP
+  /// Get gold price (Ounce)
   Future<GoldPrice> getGoldPrice() async {
     try {
-      final results = await Future.wait([
-        getGoldPriceUsd(),
-        getUsdToEgpRate(),
-      ]);
-
-      final priceUsd = results[0];
-      final egpRate = results[1];
-      final priceEgp = priceUsd * egpRate;
-
+      final prices = await _fetchGoldData();
+      final usdRate = await getUsdToEgpRate();
+      
+      final ouncePriceUsd = (prices['ounce']?['price'] as num?)?.toDouble() ?? 0.0;
+      final ounceChange = (prices['ounce']?['change'] as num?)?.toDouble() ?? 0.0;
+      
       return GoldPrice(
-        price: priceUsd,
-        priceEgp: priceEgp,
-        change: 0,
-        changePercent: 0,
+        price: ouncePriceUsd,
+        priceEgp: ouncePriceUsd * usdRate,
+        change: ounceChange,
+        changePercent: ouncePriceUsd > 0 ? (ounceChange / ouncePriceUsd) * 100 : 0,
         unit: 'أونصة',
         lastUpdated: DateTime.now(),
       );
@@ -69,23 +70,20 @@ class GoldService {
     }
   }
 
-  /// Get silver price in EGP
+  /// Get silver price (Ounce)
   Future<SilverPrice> getSilverPrice() async {
     try {
-      final results = await Future.wait([
-        getSilverPriceUsd(),
-        getUsdToEgpRate(),
-      ]);
+      final prices = await _fetchGoldData();
+      final usdRate = await getUsdToEgpRate();
 
-      final priceUsd = results[0];
-      final egpRate = results[1];
-      final priceEgp = priceUsd * egpRate;
+      final ouncePriceUsd = (prices['silver_ounce']?['price'] as num?)?.toDouble() ?? 0.0;
+      final ounceChange = (prices['silver_ounce']?['change'] as num?)?.toDouble() ?? 0.0;
 
       return SilverPrice(
-        price: priceUsd,
-        priceEgp: priceEgp,
-        change: 0,
-        changePercent: 0,
+        price: ouncePriceUsd,
+        priceEgp: ouncePriceUsd * usdRate,
+        change: ounceChange,
+        changePercent: ouncePriceUsd > 0 ? (ounceChange / ouncePriceUsd) * 100 : 0,
         unit: 'أونصة',
         lastUpdated: DateTime.now(),
       );
@@ -101,16 +99,23 @@ class GoldService {
     }
   }
 
-  /// Get gold price per gram in EGP
+  /// Get gold price per gram in EGP (24K)
   Future<double> getGoldPricePerGramEgp() async {
-    final goldPrice = await getGoldPrice();
-    // 1 troy ounce = 31.1035 grams
-    return goldPrice.priceEgp / 31.1035;
+    try {
+      final prices = await _fetchGoldData();
+      return (prices['karat_24']?['price_per_gram'] as num?)?.toDouble() ?? 0.0;
+    } catch (e) {
+      return 0.0;
+    }
   }
 
   /// Get silver price per gram in EGP
   Future<double> getSilverPricePerGramEgp() async {
-    final silverPrice = await getSilverPrice();
-    return silverPrice.priceEgp / 31.1035;
+    try {
+      final prices = await _fetchGoldData();
+      return (prices['silver']?['price_per_gram'] as num?)?.toDouble() ?? 0.0;
+    } catch (e) {
+      return 0.0;
+    }
   }
 }

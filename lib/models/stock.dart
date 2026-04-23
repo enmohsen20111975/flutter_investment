@@ -39,24 +39,26 @@ class Stock {
 
   factory Stock.fromJson(Map<String, dynamic> json) {
     return Stock(
-      symbol: json['symbol'] as String? ?? '',
-      name: json['name'] as String? ?? json['nameAr'] as String? ?? '',
-      nameEn: json['nameEn'] as String? ?? json['name'] as String? ?? '',
+      symbol: json['ticker'] as String? ?? json['symbol'] as String? ?? '',
+      name: json['name_ar'] as String? ?? json['nameAr'] as String? ?? json['name'] as String? ?? '',
+      nameEn: json['name'] as String? ?? json['nameEn'] as String? ?? '',
       sector: json['sector'] as String? ?? '',
-      price: (json['price'] as num? ?? 0).toDouble(),
-      openPrice: (json['openPrice'] as num? ?? json['open'] as num? ?? 0).toDouble(),
-      highPrice: (json['highPrice'] as num? ?? json['high'] as num? ?? 0).toDouble(),
-      lowPrice: (json['lowPrice'] as num? ?? json['low'] as num? ?? 0).toDouble(),
-      prevClose: (json['prevClose'] as num? ?? json['previousClose'] as num? ?? 0).toDouble(),
-      change: (json['change'] as num? ?? 0).toDouble(),
-      changePercent: (json['changePercent'] as num? ?? json['changePercentage'] as num? ?? 0).toDouble(),
+      price: (json['current_price'] as num? ?? json['price'] as num? ?? 0).toDouble(),
+      openPrice: (json['open_price'] as num? ?? json['openPrice'] as num? ?? json['open'] as num? ?? 0).toDouble(),
+      highPrice: (json['high_price'] as num? ?? json['highPrice'] as num? ?? json['high'] as num? ?? 0).toDouble(),
+      lowPrice: (json['low_price'] as num? ?? json['lowPrice'] as num? ?? json['low'] as num? ?? 0).toDouble(),
+      prevClose: (json['previous_close'] as num? ?? json['prevClose'] as num? ?? json['previousClose'] as num? ?? 0).toDouble(),
+      change: (json['price_change'] as num? ?? json['change'] as num? ?? 0).toDouble(),
+      changePercent: (json['change_percent'] as num? ?? json['changePercent'] as num? ?? json['changePercentage'] as num? ?? 0).toDouble(),
       volume: json['volume'] as int? ?? 0,
-      marketCap: (json['marketCap'] as num? ?? json['marketCap'] as num? ?? 0).toDouble(),
+      marketCap: (json['market_cap'] as num? ?? json['marketCap'] as num? ?? 0).toDouble(),
       trades: json['trades'] as int? ?? 0,
       status: json['status'] as String? ?? 'active',
-      lastUpdated: json['lastUpdated'] != null
-          ? DateTime.parse(json['lastUpdated'] as String)
-          : null,
+      lastUpdated: json['last_update'] != null
+          ? DateTime.parse(json['last_update'] as String)
+          : json['lastUpdated'] != null
+              ? DateTime.parse(json['lastUpdated'] as String)
+              : null,
       logo: json['logo'] as String?,
     );
   }

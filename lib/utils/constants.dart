@@ -17,34 +17,34 @@ class AppConstants {
   static const String fcmTokenKey = 'fcm_token';
 
   // API Endpoints
-  static const String loginEndpoint = '/auth/login';
-  static const String registerEndpoint = '/auth/register';
-  static const String logoutEndpoint = '/auth/logout';
-  static const String refreshTokenEndpoint = '/auth/refresh';
-  static const String userProfileEndpoint = '/auth/profile';
+  static const String loginEndpoint = 'auth/login';
+  static const String registerEndpoint = 'auth/register';
+  static const String logoutEndpoint = 'auth/logout';
+  static const String refreshTokenEndpoint = 'auth/refresh';
+  static const String userProfileEndpoint = 'auth/profile';
 
-  static const String stocksEndpoint = '/stocks';
-  static const String stockDetailEndpoint = '/stocks';
-  static const String stockSearchEndpoint = '/stocks/search';
-  static const String stockHistoryEndpoint = '/stocks';
-  static const String stockPredictionsEndpoint = '/stocks';
+  static const String stocksEndpoint = 'stocks';
+  static const String stockDetailEndpoint = 'stocks';
+  static const String stockSearchEndpoint = 'stocks';
+  static const String stockHistoryEndpoint = 'stocks';
+  static const String stockPredictionsEndpoint = 'stocks';
 
-  static const String portfolioEndpoint = '/portfolio';
-  static const String portfolioHoldingsEndpoint = '/portfolio/holdings';
-  static const String portfolioTransactionsEndpoint = '/portfolio/transactions';
+  static const String portfolioEndpoint = 'portfolio';
+  static const String portfolioHoldingsEndpoint = 'portfolio/holdings';
+  static const String portfolioTransactionsEndpoint = 'portfolio/transactions';
 
-  static const String watchlistEndpoint = '/watchlist';
-  static const String alertsEndpoint = '/alerts';
+  static const String watchlistEndpoint = 'watchlist';
+  static const String alertsEndpoint = 'alerts';
 
-  static const String goldPriceEndpoint = '/gold';
-  static const String silverPriceEndpoint = '/silver';
-  static const String currencyEndpoint = '/currency';
+  static const String goldPriceEndpoint = 'market/gold';
+  static const String silverPriceEndpoint = 'market/gold';
+  static const String currencyEndpoint = 'market/currency';
 
-  static const String aiChatEndpoint = '/ai/chat';
+  static const String aiChatEndpoint = 'ai/chat';
 
-  static const String newsEndpoint = '/news';
-  static const String marketSummaryEndpoint = '/market/summary';
-  static const String marketIndicesEndpoint = '/market/indices';
+  static const String newsEndpoint = 'news';
+  static const String marketSummaryEndpoint = 'market/overview';
+  static const String marketIndicesEndpoint = 'market/indices';
 
   // Market Session Times (Cairo Time)
   static const String marketOpenTime = '10:00';

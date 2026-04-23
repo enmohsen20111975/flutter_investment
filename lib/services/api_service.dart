@@ -125,37 +125,7 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final refreshToken = prefs.getString('refresh_token');
-        if (refreshToken != null) {
-          final response = await Dio().post(
-            '${AppConfig.apiBaseUrl}${AppConfig.apiVersion}/auth/refresh',
-            data: {'refreshToken': refreshToken},
-          );
-          if (response.statusCode == 200) {
-            final newToken = response.data['token'] as String?;
-            if (newToken != null) {
-              await prefs.setString('auth_token', newToken);
-              _apiService.setToken(newToken);
-
-              // Retry original request
-              err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-              final retryResponse = await Dio().fetch(err.requestOptions);
-              handler.resolve(retryResponse);
-              return;
-            }
-          }
-        }
-      } catch (_) {
-        // Refresh token failed, need to re-login
-      }
-      // Clear tokens and redirect to login
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      _apiService.clearToken();
-    }
+    // 401 handling and redirect removed since application runs directly without sign in.
     handler.next(err);
   }
 }

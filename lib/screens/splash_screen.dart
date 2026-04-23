@@ -52,13 +52,8 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    final authProvider = context.read<AuthProvider>();
-
-    if (authProvider.isAuthenticated) {
-      context.go(AppRoutes.dashboard);
-    } else {
-      context.go(AppRoutes.login);
-    }
+    // Bypass authentication and go directly to dashboard
+    context.go(AppRoutes.dashboard);
   }
 
   @override

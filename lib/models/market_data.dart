@@ -17,14 +17,16 @@ class MarketIndex {
 
   factory MarketIndex.fromJson(Map<String, dynamic> json) {
     return MarketIndex(
-      name: json['name'] as String? ?? json['nameAr'] as String? ?? '',
-      nameEn: json['nameEn'] as String? ?? json['name'] as String? ?? '',
+      name: json['name_ar'] as String? ?? json['nameAr'] as String? ?? json['name'] as String? ?? '',
+      nameEn: json['name'] as String? ?? json['nameEn'] as String? ?? '',
       value: (json['value'] as num? ?? 0).toDouble(),
       change: (json['change'] as num? ?? 0).toDouble(),
-      changePercent: (json['changePercent'] as num? ?? 0).toDouble(),
-      lastUpdated: json['lastUpdated'] != null
-          ? DateTime.parse(json['lastUpdated'] as String)
-          : DateTime.now(),
+      changePercent: (json['change_percent'] as num? ?? json['changePercent'] as num? ?? 0).toDouble(),
+      lastUpdated: json['last_updated'] != null
+          ? DateTime.parse(json['last_updated'] as String)
+          : json['lastUpdated'] != null
+              ? DateTime.parse(json['lastUpdated'] as String)
+              : DateTime.now(),
     );
   }
 }
@@ -59,24 +61,29 @@ class MarketSummary {
   });
 
   factory MarketSummary.fromJson(Map<String, dynamic> json) {
+    final summary = json['summary'] as Map<String, dynamic>? ?? json;
+    final marketStatus = json['market_status'] as Map<String, dynamic>?;
+
     return MarketSummary(
       indices: (json['indices'] as List<dynamic>?)
               ?.map((e) => MarketIndex.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      totalStocks: json['totalStocks'] as int? ?? 0,
-      gainers: json['gainers'] as int? ?? 0,
-      losers: json['losers'] as int? ?? 0,
-      unchanged: json['unchanged'] as int? ?? 0,
-      totalVolume: (json['totalVolume'] as num? ?? 0).toDouble(),
-      totalValue: (json['totalValue'] as num? ?? 0).toDouble(),
-      indexValue: (json['indexValue'] as num?)?.toDouble(),
-      change: (json['change'] as num?)?.toDouble(),
-      changePercent: (json['changePercent'] as num?)?.toDouble(),
-      isMarketOpen: json['isMarketOpen'] as bool? ?? false,
-      lastUpdated: json['lastUpdated'] != null
-          ? DateTime.parse(json['lastUpdated'] as String)
-          : null,
+      totalStocks: summary['total_stocks'] as int? ?? summary['totalStocks'] as int? ?? 0,
+      gainers: summary['gainers'] as int? ?? 0,
+      losers: summary['losers'] as int? ?? 0,
+      unchanged: summary['unchanged'] as int? ?? 0,
+      totalVolume: (summary['totalVolume'] as num? ?? 0).toDouble(), // Not strictly in new API's summary object, fallback 0
+      totalValue: (summary['totalValue'] as num? ?? 0).toDouble(),
+      indexValue: (summary['indexValue'] as num?)?.toDouble(),
+      change: (summary['change'] as num?)?.toDouble(),
+      changePercent: (summary['changePercent'] as num?)?.toDouble(),
+      isMarketOpen: marketStatus?['is_open'] as bool? ?? json['isMarketOpen'] as bool? ?? false,
+      lastUpdated: json['last_updated'] != null
+          ? DateTime.parse(json['last_updated'] as String)
+          : json['lastUpdated'] != null
+              ? DateTime.parse(json['lastUpdated'] as String)
+              : null,
     );
   }
 }

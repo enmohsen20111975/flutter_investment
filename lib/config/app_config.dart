@@ -1,7 +1,7 @@
 class AppConfig {
   // Backend API Base URL - Update this to your server's URL
   static const String apiBaseUrl = 'https://invist.m2y.net';
-  static const String apiVersion = '/api/v1';
+  static const String apiVersion = '/api/';
 
   // WebSocket URL for AI Chat
   static const String wsBaseUrl = 'wss://invist.m2y.net';
@@ -12,10 +12,6 @@ class AppConfig {
   static const Duration receiveTimeout = Duration(seconds: 30);
   static const Duration sendTimeout = Duration(seconds: 30);
 
-  // Gold/Silver API
-  static const String goldApiUrl = 'https://api.gold-api.com/price/XAU';
-  static const String silverApiUrl = 'https://api.gold-api.com/price/XAG';
-  static const String currencyApiUrl = 'https://open.er-api.com/v6/latest/USD';
 
   // Cache settings
   static const Duration stockCacheDuration = Duration(minutes: 5);
