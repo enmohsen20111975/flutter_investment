@@ -194,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'أنشئ حسابك وابدأ الاستثمار في البورصة المصرية',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppTheme.textColor.withValues(alpha: 0.6),
+                      color: AppTheme.textColor.withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -249,7 +249,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscurePassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppTheme.textColor.withValues(alpha: 0.5),
+                        color: AppTheme.textColor.withOpacity(0.5),
                       ),
                       onPressed: () {
                         setState(
@@ -280,7 +280,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscureConfirmPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppTheme.textColor.withValues(alpha: 0.5),
+                        color: AppTheme.textColor.withOpacity(0.5),
                       ),
                       onPressed: () {
                         setState(() =>
@@ -308,7 +308,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         side: BorderSide(
                           color: _acceptedTerms
                               ? AppTheme.primaryColor
-                              : AppTheme.textColor.withValues(alpha: 0.4),
+                              : AppTheme.textColor.withOpacity(0.3),
                           width: 1.5,
                         ),
                         shape: RoundedRectangleBorder(
@@ -345,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppTheme.textColor
-                                        .withValues(alpha: 0.7),
+                                        .withOpacity(0.7),
                                   ),
                                   children: [
                                     TextSpan(
@@ -378,7 +378,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor:
-                            AppTheme.primaryColor.withValues(alpha: 0.5),
+                            AppTheme.primaryColor.withOpacity(0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -414,7 +414,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         'لديك حساب؟',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppTheme.textColor.withValues(alpha: 0.6),
+                          color: AppTheme.textColor.withOpacity(0.7),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -460,7 +460,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               'قوة كلمة المرور',
               style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.textColor.withValues(alpha: 0.5),
+                color: AppTheme.textColor.withOpacity(0.6),
               ),
             ),
             Text(
@@ -478,7 +478,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: _getStrengthValue(),
-            backgroundColor: AppTheme.textColor.withValues(alpha: 0.1),
+            backgroundColor: AppTheme.textColor.withOpacity(0.1),
             valueColor: AlwaysStoppedAnimation<Color>(_getStrengthColor()),
             minHeight: 4,
           ),
@@ -512,18 +512,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         hintTextDirection: textDirection,
         prefixIcon: Icon(
           prefixIcon,
-          color: AppTheme.textColor.withValues(alpha: 0.5),
+          color: AppTheme.textColor.withOpacity(0.4),
           size: 20,
         ),
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: AppTheme.surfaceColor,
         labelStyle: TextStyle(
-          color: AppTheme.textColor.withValues(alpha: 0.7),
+          color: AppTheme.textColor.withOpacity(0.5),
           fontSize: 14,
         ),
         hintStyle: TextStyle(
-          color: AppTheme.textColor.withValues(alpha: 0.35),
+          color: AppTheme.textColor.withOpacity(0.3),
           fontSize: 14,
         ),
         border: OutlineInputBorder(
@@ -533,7 +533,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: AppTheme.textColor.withValues(alpha: 0.1),
+            color: AppTheme.textColor.withOpacity(0.1),
           ),
         ),
         focusedBorder: OutlineInputBorder(

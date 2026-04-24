@@ -6,6 +6,9 @@ import '../config/theme.dart';
 import '../models/chat_message.dart';
 import '../services/chat_service.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -172,14 +175,23 @@ class _AiChatScreenState extends State<AiChatScreen>
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Color(0xFFF5F5F5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text('المستشار الذكي'),
+          title: const Text('المستشار الذكي AI'),
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
           centerTitle: true,
           elevation: 0,
           actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: 'مسح المحادثة',
@@ -281,6 +293,7 @@ class _AiChatScreenState extends State<AiChatScreen>
 
   Widget _buildMessageBubble(ChatMessage message) {
     final isUser = message.isUser;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -292,8 +305,8 @@ class _AiChatScreenState extends State<AiChatScreen>
           if (!isUser) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: AppTheme.primary.withOpacity(0.1),
-              child: Icon(
+              backgroundColor: AppTheme.primary.withOpacity(0.15),
+              child: const Icon(
                 Icons.smart_toy_outlined,
                 size: 18,
                 color: AppTheme.primary,
@@ -307,11 +320,11 @@ class _AiChatScreenState extends State<AiChatScreen>
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
+                horizontal: 16,
+                vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: isUser ? AppTheme.primary : Colors.white,
+                color: isUser ? AppTheme.primary : (isDark ? AppTheme.surfaceDark : Colors.white),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
@@ -324,11 +337,12 @@ class _AiChatScreenState extends State<AiChatScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
+                border: !isUser ? Border.all(color: isDark ? Colors.white10 : Colors.grey.shade100) : null,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -490,20 +504,21 @@ class _AiChatScreenState extends State<AiChatScreen>
   Widget _buildInputArea() {
     final hasText = _messageController.text.trim().isNotEmpty;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
             blurRadius: 12,
             offset: const Offset(0, -2),
           ),
         ],
         border: Border(
           top: BorderSide(
-            color: Colors.grey.shade200,
+            color: isDark ? Colors.white10 : Colors.grey.shade200,
             width: 1,
           ),
         ),

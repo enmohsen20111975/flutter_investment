@@ -4,6 +4,9 @@ import '../config/theme.dart';
 import '../models/portfolio.dart';
 import '../services/portfolio_service.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
@@ -122,13 +125,24 @@ class _PortfolioScreenState extends State<PortfolioScreen>
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppTheme.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text('محفظتي'),
+          title: const Text('محفظتي الاستثمارية'),
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
           centerTitle: true,
           elevation: 0,
+          actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _showAddHoldingBottomSheet,
@@ -256,20 +270,20 @@ class _PortfolioScreenState extends State<PortfolioScreen>
     final plSign = summary.totalPnL >= 0 ? '+' : '';
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(UIConstants.horizontalPadding),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryDark],
+          colors: [AppTheme.primary, AppTheme.primary.withOpacity(0.8)],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
         boxShadow: [
           BoxShadow(
             color: AppTheme.primary.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -537,15 +551,16 @@ class _PortfolioScreenState extends State<PortfolioScreen>
     final plColor = holding.pnl >= 0 ? AppTheme.gain : AppTheme.loss;
     final plSign = holding.pnl >= 0 ? '+' : '';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade100),
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

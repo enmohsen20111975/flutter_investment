@@ -7,6 +7,7 @@ import '../config/theme.dart';
 import '../providers/watchlist_provider.dart';
 import '../providers/theme_provider.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
 import '../widgets/loading_widget.dart';
 
 class WatchlistScreen extends StatefulWidget {
@@ -35,21 +36,22 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
+          backgroundColor: AppTheme.primary,
           title: Consumer<WatchlistProvider>(
             builder: (context, provider, child) {
               final count = provider.watchlistStocks.length;
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('القائمة المفضلة'),
+                  const Text('القائمة المفضلة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   if (count > 0) ...[
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: Colors.white24,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -66,6 +68,17 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
               );
             },
           ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
+          ],
           centerTitle: true,
         ),
         body: Consumer<WatchlistProvider>(
@@ -151,15 +164,22 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                         ),
                       );
                     },
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? AppTheme.surfaceDark : Colors.white,
+                        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+                        border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      color: isDark ? AppColors.darkCard : Colors.white,
                       child: InkWell(
                         onTap: () {
-                          context.push(AppRoutes.stockDetail, extra: stock.symbol);
+                          context.push(AppRoutes.stockDetail.replaceAll(':symbol', stock.symbol));
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(

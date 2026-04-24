@@ -6,6 +6,7 @@ import '../config/routes.dart';
 import '../config/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
+import '../utils/ui_constants.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -20,10 +21,13 @@ class SettingsScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text('الإعدادات'),
+          title: const Text('الإعدادات العامة'),
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
           centerTitle: true,
+          elevation: 0,
         ),
         body: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -89,12 +93,18 @@ class SettingsScreen extends StatelessWidget {
     final displayEmail = (userData?['email'] as String?) ?? 'user@egx.com';
     final firstLetter = displayName.isNotEmpty ? displayName[0] : 'م';
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      color: isDark ? AppColors.darkCard : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -164,12 +174,18 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildAppearanceCard(BuildContext context, ThemeProvider provider, bool isDark) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      color: isDark ? AppColors.darkCard : Colors.white,
       child: Column(
         children: [
           // Header

@@ -7,6 +7,10 @@ import '../providers/stock_provider.dart';
 import '../providers/watchlist_provider.dart';
 import '../models/stock.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/price_chart.dart';
+import '../models/stock_history.dart';
 
 class StockDetailScreen extends StatefulWidget {
   final String symbol;
@@ -70,26 +74,36 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        // Use theme background
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
             _stock?.name ?? widget.symbol,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 20,
             ),
           ),
-          backgroundColor: AppTheme.primaryColor,
+          backgroundColor: AppTheme.primary,
           elevation: 0,
           actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
             Consumer<WatchlistProvider>(
               builder: (context, watchlistProvider, _) {
                 final isInWatchlist = watchlistProvider.isInWatchlist(widget.symbol);
                 return IconButton(
                   icon: Icon(
                     isInWatchlist ? Icons.star : Icons.star_border,
-                    color: isInWatchlist ? AppTheme.accentColor : Colors.white,
+                    color: isInWatchlist ? AppTheme.accent : Colors.white,
                     size: 26,
                   ),
                   onPressed: () {
@@ -100,12 +114,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.share_outlined, color: Colors.white, size: 24),
-              onPressed: () {
-                // Share stock
-              },
-            ),
           ],
         ),
         body: _isLoading
@@ -113,22 +121,25 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             : _stock != null
                 ? SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: UIConstants.horizontalPadding,
+                      vertical: UIConstants.verticalPadding,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildStockHeader(),
-                        const SizedBox(height: 20),
-                        _buildPriceInfoGrid(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: UIConstants.elementSpacing),
                         _buildChartSection(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: UIConstants.elementSpacing),
+                        _buildPriceInfoGrid(),
+                        const SizedBox(height: UIConstants.elementSpacing),
                         _buildAIPredictionSection(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: UIConstants.elementSpacing),
                         _buildStockInfoSection(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: UIConstants.elementSpacing),
                         _buildAddToPortfolioButton(),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   )
@@ -283,16 +294,21 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: 3,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.3,
-            children: infoItems.map((item) {
-              return _buildInfoCard(item);
-            }).toList(),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // 3 columns with spacing
+              final cardWidth = (constraints.maxWidth - 24) / 3;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: infoItems.map((item) {
+                  return SizedBox(
+                    width: cardWidth,
+                    child: _buildInfoCard(item),
+                  );
+                }).toList(),
+              );
+            },
           ),
         ],
       ),
@@ -301,7 +317,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   Widget _buildInfoCard(_InfoItem item) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(10),
@@ -309,7 +325,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(item.icon, size: 20, color: AppTheme.primaryColor.withOpacity(0.7)),
           const SizedBox(height: 6),
@@ -323,16 +339,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(
-            item.value,
-            style: TextStyle(
-              fontSize: 11,
-              color: AppTheme.textColorDark,
-              fontWeight: FontWeight.bold,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              item.value,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.textColorDark,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -402,35 +420,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           const SizedBox(height: 16),
 
           // Chart area (placeholder)
-          Container(
-            width: double.infinity,
-            height: 220,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.show_chart,
-                    size: 48,
-                    color: AppTheme.primaryColor.withOpacity(0.2),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'الرسم البياني',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // Real Price Chart
+          PriceChart(
+            data: List.generate(20, (index) {
+              final price = _stock!.price + (index * 0.5) - (index % 3);
+              return StockHistory(
+                date: DateTime.now().subtract(Duration(days: 20 - index)),
+                open: price,
+                high: price + 0.2,
+                low: price - 0.2,
+                close: price,
+                volume: 1000 + (index * 100),
+              );
+            }), // Temporary placeholder data for structure, should use real provider data
+            height: 240,
           ),
         ],
       ),

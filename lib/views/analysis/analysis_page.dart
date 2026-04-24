@@ -8,6 +8,10 @@ import '../../utils/app_parsers.dart';
 import '../../views/stocks/stock_detail_page.dart';
 import '../../widgets/common/section_card.dart';
 import 'recommendation_details_sheet.dart';
+import '../../utils/ui_constants.dart';
+import '../../providers/theme_provider.dart';
+import '../../config/theme.dart';
+import 'package:provider/provider.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({required this.controller, super.key});
@@ -66,6 +70,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
         title: const Text('تحليل وتوصيات الاستثمار'),
         actions: [
           IconButton(
+            icon: Icon(
+              context.watch<ThemeProvider>().isDarkMode 
+                ? Icons.nightlight_round 
+                : Icons.wb_sunny
+            ),
+            onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+          ),
+          IconButton(
             icon: Icon(_isCardView
                 ? Icons.view_list_rounded
                 : Icons.grid_view_rounded),
@@ -80,10 +92,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
-          16,
-          16,
-          16,
-          16 + MediaQuery.of(context).padding.bottom,
+          UIConstants.horizontalPadding,
+          UIConstants.verticalPadding,
+          UIConstants.horizontalPadding,
+          UIConstants.verticalPadding + MediaQuery.of(context).padding.bottom,
         ),
         children: [
           SectionCard(

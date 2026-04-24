@@ -62,7 +62,7 @@ class MarketSummary {
 
   factory MarketSummary.fromJson(Map<String, dynamic> json) {
     final summary = json['summary'] as Map<String, dynamic>? ?? json;
-    final marketStatus = json['market_status'] as Map<String, dynamic>?;
+    final marketStatus = json['market_status'] as Map<String, dynamic>? ?? json['marketStatus'] as Map<String, dynamic>?;
 
     return MarketSummary(
       indices: (json['indices'] as List<dynamic>?)
@@ -73,12 +73,12 @@ class MarketSummary {
       gainers: summary['gainers'] as int? ?? 0,
       losers: summary['losers'] as int? ?? 0,
       unchanged: summary['unchanged'] as int? ?? 0,
-      totalVolume: (summary['totalVolume'] as num? ?? 0).toDouble(), // Not strictly in new API's summary object, fallback 0
-      totalValue: (summary['totalValue'] as num? ?? 0).toDouble(),
-      indexValue: (summary['indexValue'] as num?)?.toDouble(),
+      totalVolume: (summary['total_volume'] as num? ?? summary['totalVolume'] as num? ?? 0).toDouble(),
+      totalValue: (summary['total_value'] as num? ?? summary['totalValue'] as num? ?? 0).toDouble(),
+      indexValue: (summary['index_value'] as num? ?? summary['indexValue'] as num?)?.toDouble(),
       change: (summary['change'] as num?)?.toDouble(),
-      changePercent: (summary['changePercent'] as num?)?.toDouble(),
-      isMarketOpen: marketStatus?['is_open'] as bool? ?? json['isMarketOpen'] as bool? ?? false,
+      changePercent: (summary['change_percent'] as num? ?? summary['changePercent'] as num?)?.toDouble(),
+      isMarketOpen: marketStatus?['is_open'] as bool? ?? marketStatus?['isOpen'] as bool? ?? json['isMarketOpen'] as bool? ?? false,
       lastUpdated: json['last_updated'] != null
           ? DateTime.parse(json['last_updated'] as String)
           : json['lastUpdated'] != null

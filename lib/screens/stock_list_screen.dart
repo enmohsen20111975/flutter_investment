@@ -10,21 +10,10 @@ import '../providers/watchlist_provider.dart';
 import '../models/stock.dart';
 import '../utils/helpers.dart';
 
-/// Constants for filter chips and sort options
-class AppConstants {
-  static const List<String> sectors = [
-    'الكل',
-    'البنوك',
-    'الخدمات المالية',
-    'العقارات',
-    'التصنيع',
-    'الطاقة',
-    'الغذاء',
-    'الصحة',
-    'الاتصالات',
-    'التجارة',
-  ];
+import '../providers/theme_provider.dart';
 
+/// Constants for sort options
+class AppConstants {
   static const List<Map<String, String>> sortOptions = [
     {'key': 'default', 'label': 'الافتراضي'},
     {'key': 'price_asc', 'label': 'السعر (تصاعدي)'},
@@ -46,7 +35,6 @@ class StockListScreen extends StatefulWidget {
 class _StockListScreenState extends State<StockListScreen> {
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
-  String _selectedSector = 'الكل';
   String _selectedSortKey = 'default';
 
   @override
@@ -72,15 +60,6 @@ class _StockListScreenState extends State<StockListScreen> {
 
   void _onSearchChanged(String query) {
     context.read<StockProvider>().searchStocks(query);
-  }
-
-  void _onSectorChanged(String sector) {
-    setState(() => _selectedSector = sector);
-    if (sector == 'الكل') {
-      context.read<StockProvider>().setSector('');
-    } else {
-      context.read<StockProvider>().setSector(sector);
-    }
   }
 
   void _onSortChanged(String sortKey) {
@@ -120,7 +99,7 @@ class _StockListScreenState extends State<StockListScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
             'الأسهم',
@@ -130,9 +109,18 @@ class _StockListScreenState extends State<StockListScreen> {
               fontSize: 20,
             ),
           ),
-          backgroundColor: AppTheme.primaryColor,
+          backgroundColor: AppTheme.primary,
           elevation: 0,
           actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
             IconButton(
               icon: Icon(
                 _isSearchVisible ? Icons.close : Icons.search,
@@ -155,9 +143,6 @@ class _StockListScreenState extends State<StockListScreen> {
           children: [
             // Search Bar
             if (_isSearchVisible) _buildSearchBar(),
-
-            // Filter Chips Row
-            _buildFilterChips(),
 
             // Sort Dropdown
             _buildSortDropdown(),
@@ -190,9 +175,10 @@ class _StockListScreenState extends State<StockListScreen> {
   // ─── Search Bar ───────────────────────────────────────────────────
 
   Widget _buildSearchBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: Colors.white,
+      color: isDark ? AppTheme.surfaceDark : Colors.white,
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
@@ -200,11 +186,11 @@ class _StockListScreenState extends State<StockListScreen> {
         textDirection: TextDirection.rtl,
         decoration: InputDecoration(
           hintText: 'ابحث عن سهم...',
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+          hintStyle: TextStyle(color: isDark ? AppTheme.textSecondary : Colors.grey[400], fontSize: 14),
+          prefixIcon: Icon(Icons.search, color: isDark ? AppTheme.textSecondary : Colors.grey[400]),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(Icons.clear, color: Colors.grey[400], size: 20),
+                  icon: Icon(Icons.clear, color: isDark ? AppTheme.textSecondary : Colors.grey[400], size: 20),
                   onPressed: () {
                     _searchController.clear();
                     _onSearchChanged('');
@@ -212,7 +198,7 @@ class _StockListScreenState extends State<StockListScreen> {
                 )
               : null,
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: isDark ? Colors.black26 : Colors.grey.shade100,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -220,69 +206,26 @@ class _StockListScreenState extends State<StockListScreen> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppTheme.primaryColor, width: 1.5),
+            borderSide: BorderSide(color: AppTheme.primary, width: 1.5),
           ),
         ),
       ),
     );
   }
 
-  // ─── Filter Chips ────────────────────────────────────────────────
-
-  Widget _buildFilterChips() {
-    return Container(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: AppConstants.sectors.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final sector = AppConstants.sectors[index];
-          final isSelected = _selectedSector == sector;
-
-          return GestureDetector(
-            onTap: () => _onSectorChanged(sector),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primaryColor : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : Colors.grey.shade300,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  sector,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey[700],
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  // ─── (Sector filter removed — categories not in database) ───────────
 
   // ─── Sort Dropdown ────────────────────────────────────────────────
 
   Widget _buildSortDropdown() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
+      color: isDark ? AppTheme.surfaceDark : Colors.white,
       child: Row(
         children: [
           Icon(Icons.sort, color: Colors.grey[600], size: 18),

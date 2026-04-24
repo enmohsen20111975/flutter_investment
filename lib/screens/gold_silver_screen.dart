@@ -5,6 +5,9 @@ import '../config/theme.dart';
 import '../models/gold_price.dart';
 import '../services/gold_service.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class GoldSilverScreen extends StatefulWidget {
   const GoldSilverScreen({super.key});
@@ -73,11 +76,22 @@ class _GoldSilverScreenState extends State<GoldSilverScreen> {
       child: Scaffold(
         backgroundColor: AppTheme.background,
         appBar: AppBar(
-          title: const Text('أسعار الذهب والفضة'),
+          title: const Text('المعادن الثمينة'),
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
           centerTitle: true,
           elevation: 0,
+          actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
+          ],
         ),
         body: _isLoading
             ? _buildShimmerLoading()
@@ -86,19 +100,19 @@ class _GoldSilverScreenState extends State<GoldSilverScreen> {
                 : RefreshIndicator(
                     color: AppTheme.primary,
                     onRefresh: _fetchPrices,
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        _buildGoldCard(),
-                        const SizedBox(height: 16),
-                        _buildSilverCard(),
-                        const SizedBox(height: 16),
-                        _buildExchangeRateCard(),
-                        const SizedBox(height: 16),
-                        _buildInfoSection(),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
+                  child: ListView(
+                    padding: const EdgeInsets.all(UIConstants.horizontalPadding),
+                    children: [
+                      _buildGoldCard(),
+                      const SizedBox(height: UIConstants.elementSpacing),
+                      _buildSilverCard(),
+                      const SizedBox(height: UIConstants.elementSpacing),
+                      _buildExchangeRateCard(),
+                      const SizedBox(height: UIConstants.elementSpacing),
+                      _buildInfoSection(),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                   ),
       ),
     );
@@ -191,21 +205,21 @@ class _GoldSilverScreenState extends State<GoldSilverScreen> {
     final k21 = pricePerGram * 21 / 24;
     final k18 = pricePerGram * 18 / 24;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xFFFFF8E1),
-            Color(0xFFFFECB3),
-          ],
+          colors: isDark 
+            ? [const Color(0xFF2C2401), const Color(0xFF1A1500)]
+            : [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFFFFD54F).withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+        border: Border.all(color: const Color(0xFFFFD54F).withOpacity(isDark ? 0.2 : 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withOpacity(0.15),
+            color: Colors.amber.withOpacity(isDark ? 0.05 : 0.15),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -391,21 +405,21 @@ class _GoldSilverScreenState extends State<GoldSilverScreen> {
     final changeColor = silver.change >= 0 ? AppTheme.gain : AppTheme.loss;
     final changeSign = silver.change >= 0 ? '+' : '';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xFFF5F5F5),
-            Color(0xFFE0E0E0),
-          ],
+          colors: isDark
+            ? [const Color(0xFF1F2937), const Color(0xFF111827)]
+            : [const Color(0xFFF5F5F5), const Color(0xFFE0E0E0)],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(UIConstants.cardRadius),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.black.withOpacity(isDark ? 0.1 : 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

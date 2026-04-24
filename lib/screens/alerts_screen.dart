@@ -6,6 +6,7 @@ import '../models/alert.dart';
 import '../providers/alert_provider.dart';
 import '../providers/theme_provider.dart';
 import '../utils/helpers.dart';
+import '../utils/ui_constants.dart';
 import '../widgets/loading_widget.dart';
 
 class AlertsScreen extends StatefulWidget {
@@ -290,18 +291,30 @@ class _AlertsScreenState extends State<AlertsScreen> with SingleTickerProviderSt
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text('التنبيهات'),
+          title: const Text('تنبيهات الأسعار'),
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
           centerTitle: true,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().isDarkMode 
+                  ? Icons.nightlight_round 
+                  : Icons.wb_sunny, 
+                color: Colors.white
+              ),
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+            ),
+          ],
           bottom: TabBar(
             controller: _tabController,
-            indicatorColor: AppColors.primary,
+            indicatorColor: Colors.white,
             indicatorWeight: 3,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondary,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
             tabs: const [
               Tab(text: 'النشطة'),
               Tab(text: 'المُنفذة'),
@@ -310,7 +323,8 @@ class _AlertsScreenState extends State<AlertsScreen> with SingleTickerProviderSt
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _showCreateAlertSheet,
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppTheme.primary,
+          elevation: 4,
           child: const Icon(Icons.add_alert, color: Colors.white),
         ),
         body: Consumer<AlertProvider>(

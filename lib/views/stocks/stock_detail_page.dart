@@ -9,6 +9,10 @@ import '../../utils/app_parsers.dart';
 import '../../widgets/common/section_card.dart';
 import '../market/metal_detail_page.dart';
 import '../subscription/subscription_page.dart';
+import '../../utils/ui_constants.dart';
+import '../../providers/theme_provider.dart';
+import '../../config/theme.dart';
+import 'package:provider/provider.dart';
 
 Future<void> openStockDetailPage(
   BuildContext context, {
@@ -180,6 +184,16 @@ class _StockDetailPageState extends State<StockDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.titleOverride ?? widget.ticker),
+        actions: [
+          IconButton(
+            icon: Icon(
+              context.watch<ThemeProvider>().isDarkMode 
+                ? Icons.nightlight_round 
+                : Icons.wb_sunny
+            ),
+            onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+          ),
+        ],
       ),
       body: FutureBuilder<_StockDetailBundle>(
         future: _detailFuture,
@@ -203,7 +217,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
           final premium = bundle.premium;
           final recommendation = asMap(analysis['recommendation']);
           final historyPoints =
-              ((history['data'] as List?) ?? const <dynamic>[])
+              (((history['data'] ?? history['history']) as List?) ?? const <dynamic>[])
                   .map(asMap)
                   .toList();
           final historySummary = asMap(history['summary']);
@@ -226,10 +240,10 @@ class _StockDetailPageState extends State<StockDetailPage> {
 
           return ListView(
             padding: EdgeInsets.fromLTRB(
-              16,
-              16,
-              16,
-              16 + MediaQuery.of(context).padding.bottom,
+              UIConstants.horizontalPadding,
+              UIConstants.verticalPadding,
+              UIConstants.horizontalPadding,
+              UIConstants.verticalPadding + MediaQuery.of(context).padding.bottom,
             ),
             children: [
               Text(
@@ -259,7 +273,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                   Text(
                     '${priceChange >= 0 ? '+' : ''}${priceChange.toStringAsFixed(2)}%',
                     style: TextStyle(
-                      color: priceChange >= 0 ? Colors.green : Colors.red,
+                      color: priceChange >= 0 ? AppTheme.success : AppTheme.error,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -953,10 +967,10 @@ class _HistoricalChartUnavailable extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.45),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          color: colorScheme.outlineVariant.withOpacity(0.4),
         ),
       ),
       child: Column(
