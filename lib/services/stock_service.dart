@@ -44,7 +44,7 @@ class StockService {
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل بيانات الأسهم');
+      throw Exception('فشل في تحميل بيانات الأسهم: \$e');
     }
   }
 
@@ -54,7 +54,7 @@ class StockService {
       final response = await _api.get('${AppConstants.stockDetailEndpoint}/$symbol');
       return Stock.fromJson((response.data['data'] ?? response.data['stock'] ?? response.data) as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('فشل في تحميل بيانات السهم');
+      throw Exception('فشل في تحميل بيانات السهم: \$e');
     }
   }
 
@@ -70,7 +70,7 @@ class StockService {
       );
       return StockChartData.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('فشل في تحميل بيانات الرسم البياني');
+      throw Exception('فشل في تحميل بيانات الرسم البياني: \$e');
     }
   }
 
@@ -84,7 +84,7 @@ class StockService {
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في البحث');
+      throw Exception('فشل في البحث: \$e');
     }
   }
 
@@ -98,7 +98,7 @@ class StockService {
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل أعلى الأسهم ارتفاعاً');
+      throw Exception('فشل في تحميل أعلى الأسهم ارتفاعاً: \$e');
     }
   }
 
@@ -112,7 +112,7 @@ class StockService {
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل أعلى الأسهم انخفاضاً');
+      throw Exception('فشل في تحميل أعلى الأسهم انخفاضاً: \$e');
     }
   }
 
@@ -126,7 +126,7 @@ class StockService {
       final List<dynamic> data = ((response.data['stocks'] ?? response.data) as List<dynamic>);
       return data.map((e) => Stock.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل الأسهم الأكثر تداولاً');
+      throw Exception('فشل في تحميل الأسهم الأكثر تداولاً: \$e');
     }
   }
 
@@ -136,7 +136,7 @@ class StockService {
       final response = await _api.get(AppConstants.marketSummaryEndpoint);
       return MarketSummary.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('فشل في تحميل ملخص السوق');
+      throw Exception('فشل في تحميل ملخص السوق: \$e');
     }
   }
 
@@ -147,7 +147,7 @@ class StockService {
       final List<dynamic> data = ((response.data['indices'] ?? response.data) as List<dynamic>);
       return data.map((e) => MarketIndex.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل المؤشرات');
+      throw Exception('فشل في تحميل المؤشرات: \$e');
     }
   }
 
@@ -155,13 +155,13 @@ class StockService {
   Future<List<NewsArticle>> getStockNews(String ticker, {int limit = 10}) async {
     try {
       final response = await _api.get(
-        '${AppConstants.newsEndpoint}'.replaceAll('/news', '/stocks/$ticker/news'),
+        'stocks/$ticker/news',
         queryParameters: {'limit': limit},
       );
       final List<dynamic> data = ((response.data['news'] ?? response.data) as List<dynamic>);
       return data.map((e) => NewsArticle.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      throw Exception('فشل في تحميل الأخبار');
+      throw Exception('فشل في تحميل الأخبار: \$e');
     }
   }
 }

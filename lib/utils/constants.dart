@@ -19,6 +19,7 @@ class AppConstants {
   // API Endpoints
   static const String loginEndpoint = 'auth/login';
   static const String registerEndpoint = 'auth/register';
+  static const String googleLoginEndpoint = 'auth/google';
   static const String logoutEndpoint = 'auth/logout';
   static const String refreshTokenEndpoint = 'auth/refresh';
   static const String userProfileEndpoint = 'auth/profile';

@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user.dart';
 import '../utils/constants.dart';
+import '../config/app_config.dart';
 import 'api_service.dart';
 
 class AuthService {
@@ -83,6 +85,9 @@ class AuthService {
   Future<void> logout() async {
     try {
       await _api.post(AppConstants.logoutEndpoint);
+      // Also sign out from Google
+      final GoogleSignIn _googleSignIn = GoogleSignIn();
+      await _googleSignIn.signOut();
     } catch (_) {}
 
     final prefs = await SharedPreferences.getInstance();
@@ -92,6 +97,60 @@ class AuthService {
     await prefs.remove(AppConstants.userNameKey);
     await prefs.remove(AppConstants.userEmailKey);
     _api.clearToken();
+  }
+
+  /// Google Sign-In
+  Future<User> loginWithGoogle() async {
+    try {
+      final GoogleSignIn _googleSignIn = GoogleSignIn(
+        clientId: AppConfig.googleServerClientId,
+        scopes: ['email', 'profile'],
+      );
+      
+      // Sign out any previous session first
+      await _googleSignIn.signOut();
+      
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        throw Exception('Google sign in cancelled');
+      }
+
+      // Get authentication details
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      // Send token to backend for verification
+      final response = await _api.post(
+        AppConstants.googleLoginEndpoint,
+        data: {
+          'access_token': googleAuth.accessToken,
+          'id_token': googleAuth.idToken,
+        },
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final token = (data['token'] ?? data['accessToken']) as String;
+      final refreshToken = data['refreshToken'] as String?;
+
+      // Save tokens
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(AppConstants.tokenKey, token);
+      if (refreshToken != null) {
+        await prefs.setString(AppConstants.refreshTokenKey, refreshToken);
+      }
+      _api.setToken(token);
+
+      // Save user data
+      final user = User.fromJson((data['user'] ?? data) as Map<String, dynamic>);
+      await prefs.setString(AppConstants.userIdKey, user.id);
+      await prefs.setString(AppConstants.userNameKey, user.name);
+      await prefs.setString(AppConstants.userEmailKey, user.email);
+
+      return user;
+    } catch (e) {
+      throw _handleAuthError(e);
+    }
   }
 
   /// Get current user profile

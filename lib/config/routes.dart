@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../screens/splash_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
-import '../screens/dashboard_screen.dart';
 import '../screens/stock_list_screen.dart';
 import '../screens/stock_detail_screen.dart';
 import '../screens/gold_silver_screen.dart';
@@ -13,6 +12,7 @@ import '../screens/watchlist_screen.dart';
 import '../screens/alerts_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/portfolio_screen.dart';
+import 'main_shell.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -32,6 +32,7 @@ class AppRoutes {
     initialLocation: splash,
     debugLogDiagnostics: true,
     routes: [
+      // Auth & Onboarding (no shell navigation)
       GoRoute(
         path: splash,
         builder: (context, state) => const SplashScreen(),
@@ -44,44 +45,120 @@ class AppRoutes {
         path: register,
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: dashboard,
-        builder: (context, state) => const DashboardScreen(),
+
+      // Main App Shell with persistent drawer & bottom nav
+      StatefulShellRoute.indexedStack(
+        branches: [
+          // Branch 0: Dashboard / Home
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: dashboard,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _StockListScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 1: Stocks
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: stockList,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _StockListScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 2: Gold & Silver
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: goldSilver,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _GoldSilverScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 3: Portfolio
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: portfolio,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _PortfolioScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 4: AI Chat
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: aiChat,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _AiChatScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 5: Watchlist
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: watchlist,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _WatchlistScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 6: Alerts
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: alerts,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _AlertsScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 7: Settings
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: settings,
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _SettingsScreenWrapper(),
+                ),
+              ),
+            ],
+          ),
+        ],
+        pageBuilder: (context, state, navigationShell) {
+          return NoTransitionPage(
+            child: MainShell(navigationShell: navigationShell),
+          );
+        },
       ),
-      GoRoute(
-        path: stockList,
-        builder: (context, state) => const StockListScreen(),
-      ),
+
+      // Stock detail (pushed on top of shell)
       GoRoute(
         path: stockDetail,
         builder: (context, state) {
           final symbol = state.pathParameters['symbol']!;
           return StockDetailScreen(symbol: symbol);
         },
-      ),
-      GoRoute(
-        path: goldSilver,
-        builder: (context, state) => const GoldSilverScreen(),
-      ),
-      GoRoute(
-        path: aiChat,
-        builder: (context, state) => const AiChatScreen(),
-      ),
-      GoRoute(
-        path: watchlist,
-        builder: (context, state) => const WatchlistScreen(),
-      ),
-      GoRoute(
-        path: alerts,
-        builder: (context, state) => const AlertsScreen(),
-      ),
-      GoRoute(
-        path: settings,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: portfolio,
-        builder: (context, state) => const PortfolioScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -105,4 +182,68 @@ class AppRoutes {
       ),
     ),
   );
+}
+
+// Wrapper widgets for main app screens
+class _StockListScreenWrapper extends StatelessWidget {
+  const _StockListScreenWrapper();
+  @override
+  Widget build(BuildContext context) => const Directionality(
+        textDirection: TextDirection.rtl,
+        child: StockListScreen(),
+      );
+}
+
+class _GoldSilverScreenWrapper extends StatelessWidget {
+  const _GoldSilverScreenWrapper();
+  @override
+  Widget build(BuildContext context) => const Directionality(
+        textDirection: TextDirection.rtl,
+        child: GoldSilverScreen(),
+      );
+}
+
+class _PortfolioScreenWrapper extends StatelessWidget {
+  const _PortfolioScreenWrapper();
+  @override
+  Widget build(BuildContext context) => const Directionality(
+        textDirection: TextDirection.rtl,
+        child: PortfolioScreen(),
+      );
+}
+
+class _AiChatScreenWrapper extends StatelessWidget {
+  const _AiChatScreenWrapper();
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: const AiChatScreen(),
+      );
+}
+
+class _WatchlistScreenWrapper extends StatelessWidget {
+  const _WatchlistScreenWrapper();
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: const WatchlistScreen(),
+      );
+}
+
+class _AlertsScreenWrapper extends StatelessWidget {
+  const _AlertsScreenWrapper();
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: const AlertsScreen(),
+      );
+}
+
+class _SettingsScreenWrapper extends StatelessWidget {
+  const _SettingsScreenWrapper();
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: const SettingsScreen(),
+      );
 }
