@@ -103,7 +103,7 @@ class AuthService {
   Future<User> loginWithGoogle() async {
     try {
       final GoogleSignIn _googleSignIn = GoogleSignIn(
-        clientId: AppConfig.googleServerClientId,
+        serverClientId: AppConfig.googleServerClientId,
         scopes: ['email', 'profile'],
       );
       

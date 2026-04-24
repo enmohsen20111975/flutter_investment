@@ -22,30 +22,48 @@ class AppConstants {
   static const String googleLoginEndpoint = 'auth/google';
   static const String logoutEndpoint = 'auth/logout';
   static const String refreshTokenEndpoint = 'auth/refresh';
-  static const String userProfileEndpoint = 'auth/profile';
+  static const String userProfileEndpoint = 'auth/me';
 
   static const String stocksEndpoint = 'stocks';
   static const String stockDetailEndpoint = 'stocks';
-  static const String stockSearchEndpoint = 'stocks';
+  static const String stockSearchEndpoint = 'stocks/search';
   static const String stockHistoryEndpoint = 'stocks';
-  static const String stockPredictionsEndpoint = 'stocks';
+  static const String stockRecommendationEndpoint = 'stocks';
+  static const String stockNewsEndpoint = 'stocks';
+  static const String stockProfessionalAnalysisEndpoint = 'stocks';
+  static const String liveDataEndpoint = 'market/live-data';
 
-  static const String portfolioEndpoint = 'portfolio';
+  static const String portfolioEndpoint = 'user/assets';
   static const String portfolioHoldingsEndpoint = 'portfolio/holdings';
   static const String portfolioTransactionsEndpoint = 'portfolio/transactions';
+  static const String portfolioRecommendEndpoint = 'portfolio/recommend';
+  static const String portfolioRecommendAdvancedEndpoint = 'portfolio/recommend/advanced';
+  static const String portfolioImpactEndpoint = 'user/portfolio-impact';
+  static const String financialSummaryEndpoint = 'user/financial-summary';
+  static const String portfolioAnalysisEndpoint = 'user/portfolio-analysis';
+  static const String incomeExpenseEndpoint = 'user/income-expense';
 
-  static const String watchlistEndpoint = 'watchlist';
+  static const String watchlistEndpoint = 'user/watchlist';
   static const String alertsEndpoint = 'alerts';
 
-  static const String goldPriceEndpoint = 'market/gold';
-  static const String silverPriceEndpoint = 'market/gold';
-  static const String currencyEndpoint = 'market/currency';
-
-  static const String aiChatEndpoint = 'ai/chat';
-
-  static const String newsEndpoint = 'news';
+  static const String marketOverviewEndpoint = 'market/overview';
+  static const String marketStatusEndpoint = 'market/status';
   static const String marketSummaryEndpoint = 'market/overview';
   static const String marketIndicesEndpoint = 'market/indices';
+  static const String marketGoldEndpoint = 'market/gold';
+  static const String marketGoldHistoryEndpoint = 'market/gold/history';
+  static const String goldPriceEndpoint = 'market/gold';
+  static const String currencyEndpoint = 'market/currency';
+  static const String marketCurrencyEndpoint = 'market/currency';
+  static const String marketRecommendationsEndpoint = 'market/recommendations/trusted-sources';
+  static const String marketAiInsightsEndpoint = 'market/recommendations/ai-insights';
+  static const String marketGeminAssistantEndpoint = 'market/recommendations/gemini-assistant';
+  static const String marketUpdateStatusEndpoint = 'market/update-status';
+  static const String marketLivePricesEndpoint = 'market/live-prices';
+  static const String marketRefreshCheckEndpoint = 'market/refresh-check';
+
+  static const String newsEndpoint = 'news';
+  static const String sharePortfolioEndpoint = 'user/share-portfolio';
 
   // Market Session Times (Cairo Time)
   static const String marketOpenTime = '10:00';
