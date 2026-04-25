@@ -1,6 +1,7 @@
 import '../models/stock.dart';
 import '../models/stock_history.dart';
 import '../models/market_data.dart';
+import '../models/market_insights.dart';
 import '../utils/constants.dart';
 import 'api_service.dart';
 
@@ -151,17 +152,27 @@ class StockService {
     }
   }
 
-  /// Get stock news
-  Future<List<NewsArticle>> getStockNews(String ticker, {int limit = 10}) async {
-    try {
-      final response = await _api.get(
-        'stocks/$ticker/news',
-        queryParameters: {'limit': limit},
-      );
-      final List<dynamic> data = ((response.data['news'] ?? response.data) as List<dynamic>);
-      return data.map((e) => NewsArticle.fromJson(e as Map<String, dynamic>)).toList();
-    } catch (e) {
-      throw Exception('فشل في تحميل الأخبار: \$e');
-    }
-  }
+   /// Get stock news
+   Future<List<NewsArticle>> getStockNews(String ticker, {int limit = 10}) async {
+     try {
+       final response = await _api.get(
+         'stocks/$ticker/news',
+         queryParameters: {'limit': limit},
+       );
+       final List<dynamic> data = ((response.data['news'] ?? response.data) as List<dynamic>);
+       return data.map((e) => NewsArticle.fromJson(e as Map<String, dynamic>)).toList();
+     } catch (e) {
+       throw Exception('فشل في تحميل الأخبار: \$e');
+     }
+   }
+
+   /// Get market AI insights
+   Future<MarketInsights> getMarketAiInsights() async {
+     try {
+       final response = await _api.get(AppConstants.marketAiInsightsEndpoint);
+       return MarketInsights.fromJson(response.data as Map<String, dynamic>);
+     } catch (e) {
+       throw Exception('فشل في تحميل رؤى السوق الذكية: \$e');
+     }
+   }
 }

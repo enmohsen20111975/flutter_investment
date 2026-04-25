@@ -7,11 +7,11 @@ import '../screens/register_screen.dart';
 import '../screens/stock_list_screen.dart';
 import '../screens/stock_detail_screen.dart';
 import '../screens/gold_silver_screen.dart';
-import '../screens/ai_chat_screen.dart';
 import '../screens/watchlist_screen.dart';
 import '../screens/alerts_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/portfolio_screen.dart';
+import '../screens/market_analysis_screen.dart';
 import 'main_shell.dart';
 
 class AppRoutes {
@@ -22,7 +22,7 @@ class AppRoutes {
   static const String stockList = '/stocks';
   static const String stockDetail = '/stocks/:symbol';
   static const String goldSilver = '/gold-silver';
-  static const String aiChat = '/ai-chat';
+  static const String marketAnalysis = '/market-analysis';
   static const String watchlist = '/watchlist';
   static const String alerts = '/alerts';
   static const String settings = '/settings';
@@ -97,13 +97,13 @@ class AppRoutes {
             ],
           ),
 
-          // Branch 4: AI Chat
+          // Branch 4: Market Analysis
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: aiChat,
+                path: marketAnalysis,
                 pageBuilder: (context, state) => NoTransitionPage(
-                  child: _AiChatScreenWrapper(),
+                  child: _MarketAnalysisScreenWrapper(),
                 ),
               ),
             ],
@@ -212,15 +212,6 @@ class _PortfolioScreenWrapper extends StatelessWidget {
       );
 }
 
-class _AiChatScreenWrapper extends StatelessWidget {
-  const _AiChatScreenWrapper();
-  @override
-  Widget build(BuildContext context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: const AiChatScreen(),
-      );
-}
-
 class _WatchlistScreenWrapper extends StatelessWidget {
   const _WatchlistScreenWrapper();
   @override
@@ -245,5 +236,14 @@ class _SettingsScreenWrapper extends StatelessWidget {
   Widget build(BuildContext context) => Directionality(
         textDirection: TextDirection.rtl,
         child: const SettingsScreen(),
+      );
+}
+
+class _MarketAnalysisScreenWrapper extends StatelessWidget {
+  const _MarketAnalysisScreenWrapper();
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: const MarketAnalysisScreen(),
       );
 }

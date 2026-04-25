@@ -40,7 +40,7 @@ class _StockListScreenState extends State<StockListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
   @override

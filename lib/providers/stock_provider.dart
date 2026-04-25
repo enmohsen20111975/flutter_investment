@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/stock.dart';
 import '../models/stock_history.dart';
 import '../models/market_data.dart';
+import '../models/market_insights.dart';
 import '../services/stock_service.dart';
 
 class StockProvider extends ChangeNotifier {
@@ -12,40 +13,44 @@ class StockProvider extends ChangeNotifier {
   Stock? _selectedStock;
   StockChartData? _chartData;
   MarketSummary? _marketSummary;
-  List<NewsArticle> _news = [];
-  List<Stock> _searchResults = [];
-
-  bool _isLoadingStocks = false;
-  bool _isLoadingDetail = false;
-  bool _isLoadingChart = false;
-  bool _isLoadingMarket = false;
-  bool _isLoadingNews = false;
-  bool _isSearching = false;
-  String? _error;
-  String _selectedSector = 'الكل';
-  String _selectedSort = 'الأكثر تداولاً';
-  String _selectedInterval = '1M';
-  String _searchQuery = '';
-
-  // Getters
-  List<Stock> get stocks => _stocks;
-  Stock? get selectedStock => _selectedStock;
-  StockChartData? get chartData => _chartData;
-  MarketSummary? get marketSummary => _marketSummary;
-  List<NewsArticle> get news => _news;
-  List<Stock> get searchResults => _searchResults;
-  bool get isLoadingStocks => _isLoadingStocks;
-  bool get isLoadingDetail => _isLoadingDetail;
-  bool get isLoadingChart => _isLoadingChart;
-  bool get isLoadingMarket => _isLoadingMarket;
-  bool get isLoadingNews => _isLoadingNews;
-  bool get isLoadingSummary => _isLoadingMarket;
-  bool get isSearching => _isSearching;
-  String? get error => _error;
-  String get selectedSector => _selectedSector;
-  String get selectedSort => _selectedSort;
-  String get selectedInterval => _selectedInterval;
-  String get searchQuery => _searchQuery;
+   List<NewsArticle> _news = [];
+   List<Stock> _searchResults = [];
+   MarketInsights? _marketInsights;
+ 
+   bool _isLoadingStocks = false;
+   bool _isLoadingDetail = false;
+   bool _isLoadingChart = false;
+   bool _isLoadingMarket = false;
+   bool _isLoadingNews = false;
+   bool _isLoadingInsights = false;
+   bool _isSearching = false;
+   String? _error;
+   String _selectedSector = 'الكل';
+   String _selectedSort = 'الأكثر تداولاً';
+   String _selectedInterval = '1M';
+   String _searchQuery = '';
+ 
+   // Getters
+   List<Stock> get stocks => _stocks;
+   Stock? get selectedStock => _selectedStock;
+   StockChartData? get chartData => _chartData;
+   MarketSummary? get marketSummary => _marketSummary;
+   MarketInsights? get marketInsights => _marketInsights;
+   List<NewsArticle> get news => _news;
+   List<Stock> get searchResults => _searchResults;
+   bool get isLoadingStocks => _isLoadingStocks;
+   bool get isLoadingDetail => _isLoadingDetail;
+   bool get isLoadingChart => _isLoadingChart;
+   bool get isLoadingMarket => _isLoadingMarket;
+   bool get isLoadingNews => _isLoadingNews;
+   bool get isLoadingInsights => _isLoadingInsights;
+   bool get isLoadingSummary => _isLoadingMarket;
+   bool get isSearching => _isSearching;
+   String? get error => _error;
+   String get selectedSector => _selectedSector;
+   String get selectedSort => _selectedSort;
+   String get selectedInterval => _selectedInterval;
+   String get searchQuery => _searchQuery;
 
   /// Load all stocks
   Future<void> loadStocks() async {
@@ -116,27 +121,43 @@ class StockProvider extends ChangeNotifier {
     }
   }
 
-  /// Load news
-  Future<void> loadNews([String? ticker]) async {
-    _isLoadingNews = true;
-    notifyListeners();
+   /// Load news
+   Future<void> loadNews([String? ticker]) async {
+     _isLoadingNews = true;
+     notifyListeners();
 
-    try {
-      if (ticker != null) {
-        _news = await _stockService.getStockNews(ticker);
-      } else if (_selectedStock != null) {
-        _news = await _stockService.getStockNews(_selectedStock!.symbol);
-      } else {
-        // Fallback for general market news (uses COMI as representative stock)
-        _news = await _stockService.getStockNews('COMI');
-      }
-    } catch (_) {
-      _news = [];
-    } finally {
-      _isLoadingNews = false;
-      notifyListeners();
-    }
-  }
+     try {
+       if (ticker != null) {
+         _news = await _stockService.getStockNews(ticker);
+       } else if (_selectedStock != null) {
+         _news = await _stockService.getStockNews(_selectedStock!.symbol);
+       } else {
+         // Fallback for general market news (uses COMI as representative stock)
+         _news = await _stockService.getStockNews('COMI');
+       }
+     } catch (_) {
+       _news = [];
+     } finally {
+       _isLoadingNews = false;
+       notifyListeners();
+     }
+   }
+
+   /// Load market AI insights
+   Future<void> loadMarketInsights() async {
+     _isLoadingInsights = true;
+     _error = null;
+     notifyListeners();
+
+     try {
+       _marketInsights = await _stockService.getMarketAiInsights();
+     } catch (e) {
+       _error = e.toString();
+     } finally {
+       _isLoadingInsights = false;
+       notifyListeners();
+     }
+   }
 
   /// Search stocks
   Future<void> searchStocks(String query) async {
